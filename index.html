@@ -1,85 +1,59 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
+<html lang="ko"><head>
     <meta charset="UTF-8">
     <title>작가 천각(天刻)의 세계관 모음집</title>
     <style>
         :root { 
             --bg: #f5f5f7; --card: #ffffff; --sidebar: #ffffff;
             --text: #1d1d1f; --sub-text: #86868b;
-            --accent: #ff3b30; --gold: #ffcc00; --border: #d2d2d7; 
+            --accent: #ff3b30; --gold: #ffcc00; --border: #e5e5e7; 
             --monster-red: #d70015;
         }
         body { font-family: 'Pretendard', sans-serif; background: var(--bg); color: var(--text); display: flex; margin: 0; height: 100vh; overflow: hidden; }
         
-        /* 읽기 전용 모드 UI 제어 */
         body.reader-mode .nav-btns, body.reader-mode .btn-delete, body.reader-mode .author-note, body.reader-mode .sub-edit-label { display: none !important; }
         body.reader-mode [contenteditable="true"] { pointer-events: none; cursor: default; }
-        body.reader-mode .danger-zone { pointer-events: none; }
 
-        /* 사이드바 */
-        nav { width: 280px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 30px 20px; overflow-y: auto; display: flex; flex-direction: column; }
-        nav h2 { color: var(--text); font-size: 1rem; border-bottom: 2px solid var(--text); padding-bottom: 15px; margin-bottom: 25px; text-align: center; font-weight: 700; cursor: pointer; }
-        .nav-btns { margin-top: auto; display: flex; flex-direction: column; gap: 8px; padding-top: 20px; }
+        /* 사이드바 가시성 및 메뉴 스타일 */
+        nav { width: 300px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 30px 15px; overflow-y: auto; display: flex; flex-direction: column; }
+        nav h2 { color: var(--text); font-size: 1rem; border-bottom: 2px solid var(--text); padding-bottom: 15px; margin-bottom: 20px; text-align: center; font-weight: 700; cursor: pointer; }
+        
+        #sidebar-menu { flex: 1; overflow-y: auto; margin-bottom: 20px; }
+        .side-cat { font-size: 0.75rem; color: var(--accent); font-weight: 800; margin-top: 20px; margin-bottom: 8px; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+        .side-sub { font-size: 0.8rem; color: #555; margin: 10px 0 5px 5px; font-weight: 700; border-left: 2px solid var(--border); padding-left: 8px; }
+        .side-item { font-size: 0.85rem; padding: 8px 12px; cursor: pointer; border-radius: 6px; color: #444; margin-bottom: 2px; transition: 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .side-item:hover { background: #f2f2f7; color: #000; }
+        .side-item.active { background: #e5e5ea; color: #000; font-weight: 700; }
+
+        .nav-btns { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--border); padding-top: 15px; }
         .btn-action { background: #fff; border: 1px solid var(--border); color: #333; padding: 10px; cursor: pointer; border-radius: 8px; font-size: 0.75rem; transition: 0.2s; font-weight: 500; }
         .btn-action:hover { border-color: var(--text); background: #f2f2f7; }
 
-        /* 본문 영역 */
         main { flex: 1; display: flex; flex-direction: column; background: var(--bg); position: relative; }
-        #page-container { flex: 1; overflow-y: auto; padding: 60px; display: flex; justify-content: center; }
+        #page-container { flex: 1; overflow-y: auto; padding: 40px; display: flex; justify-content: center; }
         #content { width: 100%; max-width: 800px; animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .wiki-card { background: var(--card); padding: 60px; border-radius: 4px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.05); min-height: 700px; position: relative; transition: 0.3s; }
-        
-        /* [중요] 위험도 6점 이상 레드 모드 */
+        .wiki-card { background: var(--card); padding: 60px; border-radius: 4px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.05); min-height: 700px; position: relative; }
         .high-danger { border: 2px solid var(--monster-red); background: #fffafb; }
-        .high-danger h1, 
-        .high-danger .info-label, 
-        .high-danger .editable-area, 
-        .high-danger .info-val, 
-        .high-danger .testimony-val { color: var(--monster-red) !important; }
+        .high-danger h1, .high-danger .info-label, .high-danger .editable-area { color: var(--monster-red) !important; }
 
-        /* 인트로 & 목차 */
-        .intro-page { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%; }
-        .intro-quote { font-size: 1.2rem; color: #555; margin-bottom: 40px; font-style: italic; letter-spacing: 2px; }
-        .intro-logo { font-size: 4rem; font-weight: 800; letter-spacing: 15px; color: var(--text); }
-        .toc-list { list-style: none; padding: 0; }
-        .toc-category { font-weight: 800; font-size: 1.1rem; margin-top: 30px; border-bottom: 1px solid #000; padding-bottom: 5px; }
-        .toc-sub { font-weight: 700; font-size: 0.9rem; margin: 15px 0 5px 15px; color: #555; }
-        .toc-item { display: flex; justify-content: space-between; align-items: baseline; margin-left: 30px; margin-bottom: 8px; font-size: 0.95rem; cursor: pointer; }
-        .toc-item:hover { color: var(--accent); }
-        .toc-item::after { content: ""; flex: 1; border-bottom: 1px dotted var(--border); margin: 0 10px; }
-        .toc-page { font-weight: 600; color: var(--text); }
-
-        /* 하단 컨트롤러 */
         .page-footer { height: 60px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; background: #fff; }
-        .page-nav { display: flex; align-items: center; gap: 20px; }
         .page-num-display { font-weight: 700; font-size: 0.9rem; color: var(--sub-text); }
-        .jump-box { display: flex; align-items: center; gap: 5px; }
         .jump-input { width: 45px; padding: 5px; border: 1px solid var(--border); border-radius: 4px; text-align: center; }
 
-        /* 세부 항목 스타일 */
-        h1 { font-size: 2.8rem; margin: 0 0 20px 0; outline: none; font-weight: 800; }
+        h1 { font-size: 2.5rem; margin: 0 0 20px 0; outline: none; font-weight: 800; }
         .danger-zone { margin-bottom: 25px; color: var(--gold); cursor: pointer; font-size: 1.2rem; background: #fdfcf0; display: inline-block; padding: 5px 15px; border-radius: 30px; border: 1px solid #eee; }
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; padding: 25px 0; }
-        .info-label { font-size: 0.75rem; color: #86868b; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-        .info-val { font-size: 1rem; outline: none; color: #1d1d1f; font-weight: 500; }
-        
-        .testimony-section { margin-top: 10px; padding: 20px; background: rgba(0,0,0,0.02); border-radius: 8px; border-left: 4px solid var(--border); }
-        .testimony-val { font-style: italic; color: #444; line-height: 1.8; outline: none; }
-
-        .editable-area { line-height: 2; font-size: 1.15rem; color: #333; outline: none; min-height: 200px; padding: 15px 0; white-space: pre-wrap; }
-        .author-note { margin-top: 50px; padding: 25px; background: #fff9f9; border-radius: 12px; border: 1px dashed #ffbaba; }
-        .author-note h3 { font-size: 0.8rem; color: var(--monster-red); margin-bottom: 12px; font-weight: 800; }
-        .sub-category-box { background: #f2f2f7; padding: 4px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; outline: none; border: 1px solid var(--border); }
+        .info-label { font-size: 0.75rem; color: #86868b; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
+        .info-val { font-size: 1rem; outline: none; }
+        .editable-area { line-height: 2; font-size: 1.1rem; color: #333; outline: none; min-height: 200px; white-space: pre-wrap; }
     </style>
 </head>
 <body>
 
 <nav id="sidebar">
     <h2 onclick="goToPage(1)">천각(天刻) 세계관 도감</h2>
-    <div id="sidebar-menu"></div>
+    <div id="sidebar-menu"><div class="side-cat">1. 캐릭터</div><div class="side-sub">주연</div><div class="side-item">로인 카밀루스&nbsp;</div><div class="side-cat">2. 몬스터</div><div class="side-item">스켈레톤</div><div class="side-cat">3. 짜투리</div><div class="side-sub">미분류</div><div class="side-item">새로운 이야기</div></div>
     <div class="nav-btns">
         <button class="btn-action" onclick="addNewItem()">새로운 이야기를 적어나간다</button>
         <button class="btn-action" onclick="copyFullCode()">전체 소스 코드 복사</button>
@@ -89,16 +63,16 @@
 
 <main>
     <div id="page-container">
-        <div id="content"></div>
+        <div id="content"><div class="wiki-card" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;"><p style="font-size:1.2rem; color:#555; margin-bottom:40px; font-style:italic;">- 이 도감은 작가 천각의 이야기 보따리이다. -</p><div style="font-size:4rem; font-weight:800; letter-spacing:15px;">天 刻</div></div></div>
     </div>
     
     <div class="page-footer">
-        <div class="page-nav">
+        <div class="page-nav" style="display:flex; gap:10px;">
             <button class="btn-action" onclick="prevPage()">이전</button>
             <button class="btn-action" onclick="nextPage()">다음</button>
         </div>
         <div class="page-num-display" id="footer-page-num">PAGE 1</div>
-        <div class="jump-box">
+        <div class="jump-box" style="display:flex; gap:5px; align-items:center;">
             <input type="number" id="jump-page-input" class="jump-input" placeholder="P.">
             <button class="btn-action" onclick="jumpToPage()">이동</button>
         </div>
@@ -108,9 +82,38 @@
 <script>
     const categories = ["0. 세계관", "1. 캐릭터", "2. 몬스터", "3. 짜투리"];
     let wikiData = [
-        { type: 0, subCategory: "공통", title: "세계관 개요", content: "작가 천각(天刻) 세계관 총망라 모음집입니다.", authorMemo: "" },
-        { type: 2, subCategory: "언데드", title: "스켈레톤", danger: 3, habitat: "공동묘지, 하수도 등", weakness: "생전의 원한 해소", testimony: "“뼈 부딪히는 소리가 들리면 죽음이 가까워진 것이다.”", content: "분류: 언데드\n\n어디서나 볼 수 있는 뼈로 이루어진 망자. 생전에 이루지 못한 원한이 그의 행동 동기가 된다. 그 동기를 해소할 수만 있다면 어린 아이도 물리칠 수 있으나 무력으로 제압하려 할 경우 잘 훈련된 성인 남성 혹은 그 이상의 무력이 필요하다.", authorMemo: "" }
-    ];
+        {
+                "type": 2,
+                "title": "스켈레톤",
+                "danger": 9,
+                "habitat": "ㅁ",
+                "weakness": "생전의 원한 해소",
+                "content": "뼈로 이루어진 망자입니다. 원한의 해소만 할 수 있으면 어린 아이도 상대가 가능하다.",
+                "authorMemo": "초반 몬스터"
+        },
+        {
+                "type": 1,
+                "subCategory": "주연",
+                "title": "로인 카밀루스 ",
+                "content": "주인공 이전의 진짜 로인 카밀루스. \n\n",
+                "danger": 5,
+                "habitat": "몰락 귀족",
+                "weakness": "성수",
+                "testimony": "그 별볼일 없는 뱀파이어?",
+                "authorMemo": ""
+        },
+        {
+                "type": 3,
+                "subCategory": "미분류",
+                "title": "새로운 이야기",
+                "content": "내용 입력",
+                "danger": 1,
+                "habitat": "",
+                "weakness": "",
+                "testimony": "",
+                "authorMemo": ""
+        }
+];
 
     const saved = localStorage.getItem('chunGakData');
     if (saved) wikiData = JSON.parse(saved);
@@ -122,18 +125,49 @@
     let currentPage = 1;
     let totalPages = 2;
 
-    window.onbeforeunload = function() {
-        if (!isReader) return "수정된 내용을 소스 코드로 복사하여 저장하셨습니까?";
-    };
+    window.onbeforeunload = function() { if (!isReader) return "저장하셨습니까?"; };
 
     function getSortedData() {
         let list = [];
         categories.forEach((cat, typeIdx) => {
             const items = wikiData.filter(d => d.type === typeIdx)
                 .sort((a, b) => (a.subCategory || "").localeCompare(b.subCategory || ""));
-            list.push(...items);
+            list.push(...items.map(item => ({...item, origIdx: wikiData.indexOf(item)})));
         });
         return list;
+    }
+
+    function renderSidebar() {
+        const menu = document.getElementById('sidebar-menu');
+        menu.innerHTML = '';
+        const sorted = getSortedData();
+        
+        categories.forEach((cat, typeIdx) => {
+            const items = sorted.filter(d => d.type === typeIdx);
+            if (items.length > 0) {
+                const catDiv = document.createElement('div');
+                catDiv.className = 'side-cat';
+                catDiv.innerText = cat;
+                menu.appendChild(catDiv);
+                
+                let currentSub = "";
+                items.forEach((item) => {
+                    if (item.subCategory && item.subCategory !== currentSub) {
+                        currentSub = item.subCategory;
+                        const subDiv = document.createElement('div');
+                        subDiv.className = 'side-sub';
+                        subDiv.innerText = currentSub;
+                        menu.appendChild(subDiv);
+                    }
+                    const pNum = sorted.indexOf(item) + 3;
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'side-item' + (currentPage === pNum ? ' active' : '');
+                    itemDiv.innerText = item.title;
+                    itemDiv.onclick = () => goToPage(pNum);
+                    menu.appendChild(itemDiv);
+                });
+            }
+        });
     }
 
     function renderPage() {
@@ -144,116 +178,79 @@
         document.getElementById('footer-page-num').innerText = `PAGE ${currentPage}`;
 
         if (currentPage === 1) {
-            container.innerHTML = `<div class="wiki-card intro-page"><p class="intro-quote">- 이 도감은 작가 천각의 이야기 보따리이다. -</p><div class="intro-logo">天 刻</div></div>`;
+            container.innerHTML = `<div class="wiki-card" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;"><p style="font-size:1.2rem; color:#555; margin-bottom:40px; font-style:italic;">- 이 도감은 작가 천각의 이야기 보따리이다. -</p><div style="font-size:4rem; font-weight:800; letter-spacing:15px;">天 刻</div></div>`;
         } else if (currentPage === 2) {
-            let tocHtml = `<div class="wiki-card"><h1>목차</h1><div class="toc-list">`;
+            let tocHtml = `<div class="wiki-card"><h1>목차</h1><div style="list-style:none; padding:0;">`;
             categories.forEach((cat, typeIdx) => {
                 const items = sorted.filter(d => d.type === typeIdx);
                 if (items.length > 0) {
-                    tocHtml += `<div class="toc-category">${cat}</div>`;
-                    let currentSub = "";
+                    tocHtml += `<div style="font-weight:800; font-size:1.1rem; margin-top:30px; border-bottom:1px solid #000;">${cat}</div>`;
                     items.forEach((item) => {
-                        if (item.subCategory && item.subCategory !== currentSub) {
-                            currentSub = item.subCategory;
-                            tocHtml += `<div class="toc-sub">[${currentSub}]</div>`;
-                        }
                         const pNum = sorted.indexOf(item) + 3;
-                        tocHtml += `<div class="toc-item" onclick="goToPage(${pNum})">${item.title}<span class="toc-page">${pNum}</span></div>`;
+                        tocHtml += `<div style="display:flex; justify-content:space-between; margin:10px 0 0 20px; cursor:pointer;" onclick="goToPage(${pNum})">${item.title}<span>${pNum}</span></div>`;
                     });
                 }
             });
             tocHtml += `</div></div>`;
             container.innerHTML = tocHtml;
         } else {
-            const itemIdx = currentPage - 3;
-            const item = sorted[itemIdx];
+            const item = sorted[currentPage - 3];
             const isDangerous = (item.type === 2 || item.danger >= 6);
-            const origIdx = wikiData.indexOf(item);
-
             container.innerHTML = `
                 <div class="wiki-card ${isDangerous ? 'high-danger' : ''}">
                     <div style="margin-bottom:20px; display:flex; gap:10px; align-items:center;">
-                        <span class="cat-badge">${categories[item.type]}</span>
-                        <span class="sub-edit-label" style="font-size:0.7rem; color:#888;">🏷️ 소분류:</span>
-                        <span class="sub-category-box" contenteditable="${editable}" oninput="liveUpdate(${origIdx}, 'subCategory', this.innerText)">${item.subCategory || ''}</span>
+                        <span class="cat-badge" style="font-weight:800; font-size:0.8rem; color:var(--sub-text);">${categories[item.type]}</span>
+                        <span class="sub-category-box" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'subCategory', this.innerText)">${item.subCategory || ''}</span>
                     </div>
-                    <h1 contenteditable="${editable}" oninput="liveUpdate(${origIdx}, 'title', this.innerText)">${item.title}</h1>
-                    
-                    <div class="danger-zone" onclick="${isReader ? '' : `updateDanger(${origIdx})`}">위험도 ${'★'.repeat(item.danger || 0)}${'☆'.repeat(10 - (item.danger || 0))}</div>
-                    
+                    <h1 contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'title', this.innerText); renderSidebar();">${item.title}</h1>
+                    <div class="danger-zone" onclick="${isReader ? '' : `updateDanger(${item.origIdx})`}">위험도 ${'★'.repeat(item.danger || 0)}${'☆'.repeat(10 - (item.danger || 0))}</div>
                     <div class="info-grid">
-                        <div class="info-box"><span class="info-label">생태 (HABITAT)</span><div class="info-val" contenteditable="${editable}" oninput="liveUpdate(${origIdx}, 'habitat', this.innerText)">${item.habitat || ''}</div></div>
-                        <div class="info-box"><span class="info-label">약점 (WEAKNESS)</span><div class="info-val" contenteditable="${editable}" oninput="liveUpdate(${origIdx}, 'weakness', this.innerText)">${item.weakness || ''}</div></div>
+                        <div class="info-box"><span class="info-label">생태</span><div class="info-val" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'habitat', this.innerText)">${item.habitat || ''}</div></div>
+                        <div class="info-box"><span class="info-label">약점</span><div class="info-val" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'weakness', this.innerText)">${item.weakness || ''}</div></div>
                     </div>
-
-                    <div class="testimony-section">
-                        <span class="info-label">생존자 증언</span>
-                        <div class="testimony-val" contenteditable="${editable}" oninput="liveUpdate(${origIdx}, 'testimony', this.innerText)">${item.testimony || '증언을 기록하세요...'}</div>
+                    <div class="editable-area" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'content', this.innerText)">${item.content}</div>
+                    <div style="margin-top:40px; padding:20px; background:#fff9f9; border-radius:12px; border:1px dashed #ffbaba;" class="author-note">
+                        <h3 style="font-size:0.8rem; color:var(--monster-red); margin-bottom:12px; font-weight:800;">비밀 설정</h3>
+                        <div contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'authorMemo', this.innerText)">${item.authorMemo || ''}</div>
                     </div>
-
-                    <div class="editable-area" contenteditable="${editable}" oninput="liveUpdate(${origIdx}, 'content', this.innerText)">${item.content}</div>
-                    
-                    <div class="author-note">
-                        <h3>비밀 설정 (SECRET NOTE)</h3>
-                        <div contenteditable="${editable}" oninput="liveUpdate(${origIdx}, 'authorMemo', this.innerText)">${item.authorMemo || ''}</div>
-                    </div>
-                    <button class="btn-delete" onclick="deleteItem(${origIdx})">이 항목 삭제</button>
+                    <button class="btn-delete" style="margin-top:40px; border:1px solid #ff3b30; color:#ff3b30; padding:8px; border-radius:8px; cursor:pointer;" onclick="deleteItem(${item.origIdx})">항목 삭제</button>
                 </div>
             `;
         }
+        renderSidebar();
     }
 
     function goToPage(n) { if (n >= 1 && n <= totalPages) { currentPage = n; renderPage(); } }
     function nextPage() { goToPage(currentPage + 1); }
     function prevPage() { goToPage(currentPage - 1); }
     function jumpToPage() { const val = parseInt(document.getElementById('jump-page-input').value); if (val) goToPage(val); }
-
-    function liveUpdate(idx, field, val) {
-        wikiData[idx][field] = val;
-        localStorage.setItem('chunGakData', JSON.stringify(wikiData));
-    }
-
+    function liveUpdate(idx, field, val) { wikiData[idx][field] = val; localStorage.setItem('chunGakData', JSON.stringify(wikiData)); }
     function updateDanger(idx) {
         const val = prompt("위험도 (1-10)", wikiData[idx].danger || 1);
         const num = parseInt(val);
-        if(!isNaN(num) && num >= 1 && num <= 10) {
-            wikiData[idx].danger = num;
-            localStorage.setItem('chunGakData', JSON.stringify(wikiData));
-            renderPage(); // 즉시 리렌더링하여 색상 반영
-        }
+        if(!isNaN(num) && num >= 1 && num <= 10) { wikiData[idx].danger = num; localStorage.setItem('chunGakData', JSON.stringify(wikiData)); renderPage(); }
     }
-
     function addNewItem() {
         const typeStr = prompt("0:세계관, 1:캐릭터, 2:몬스터, 3:짜투리", "3");
         if(typeStr === null) return;
         wikiData.push({ type: parseInt(typeStr), subCategory: "미분류", title: "새로운 이야기", content: "내용 입력", danger: 1, habitat: "", weakness: "", testimony: "", authorMemo: "" });
         localStorage.setItem('chunGakData', JSON.stringify(wikiData));
-        currentPage = wikiData.length + 2;
-        renderPage();
+        currentPage = wikiData.length + 2; renderPage();
     }
-
     function copyFullCode() {
         const fullHtml = document.documentElement.outerHTML;
         const dataString = `let wikiData = ${JSON.stringify(wikiData, null, 8)};`;
         const updatedHtml = fullHtml.replace(/let wikiData = \[[\s\S]*?\];/, dataString);
-        navigator.clipboard.writeText(updatedHtml).then(() => { alert("최신 소스 코드가 복사되었습니다! 메모장에 덮어쓰기 하세요."); });
+        navigator.clipboard.writeText(updatedHtml).then(() => { alert("복사되었습니다!"); });
     }
-
     function copyReaderLink() {
         const currentUrl = window.location.href.split('?')[0];
         navigator.clipboard.writeText(`${currentUrl}?mode=read`).then(() => { alert("독자용 링크가 복사되었습니다!"); });
     }
-
     function deleteItem(idx) {
-        if(confirm("이 항목을 삭제할까요?")) {
-            wikiData.splice(idx, 1);
-            localStorage.setItem('chunGakData', JSON.stringify(wikiData));
-            currentPage = 2;
-            renderPage();
-        }
+        if(confirm("삭제할까요?")) { wikiData.splice(idx, 1); localStorage.setItem('chunGakData', JSON.stringify(wikiData)); currentPage = 2; renderPage(); }
     }
-
     renderPage();
 </script>
-</body>
-</html>
+
+</body></html>
