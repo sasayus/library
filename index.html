@@ -19,8 +19,13 @@
         }
         body { font-family: 'Pretendard', sans-serif; background: var(--bg); color: var(--text); display: flex; margin: 0; height: 100vh; overflow: hidden; transition: 0.3s; }
         
-        /* 독자 모드 UI 은폐 */
-        body.reader-mode .nav-btns, body.reader-mode .btn-delete, body.reader-mode .author-note, body.reader-mode .edit-only, body.reader-mode .update-info, body.reader-mode .theme-setter { display: none !important; }
+        /* [수정] 독자 모드에서도 테마 프리셋은 보이게 설정 */
+        body.reader-mode .nav-btns, 
+        body.reader-mode .btn-delete, 
+        body.reader-mode .author-note, 
+        body.reader-mode .edit-only, 
+        body.reader-mode .update-info { display: none !important; }
+        
         body.reader-mode [contenteditable="true"] { pointer-events: none; cursor: default; }
 
         nav { width: 300px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 25px 15px; overflow-y: auto; display: flex; flex-direction: column; }
@@ -28,7 +33,6 @@
         .novel-selector { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 10px; font-weight: 600; font-family: inherit; cursor: pointer; background: var(--card); color: var(--text); border-left: 5px solid var(--accent); }
         .search-bar { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 20px; box-sizing: border-box; font-size: 0.85rem; background: var(--bg); color: var(--text); }
 
-        /* 프리셋 버튼 */
         .preset-group { display: flex; gap: 5px; margin-bottom: 20px; justify-content: space-between; }
         .btn-preset { width: 18%; height: 25px; border-radius: 4px; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
         .btn-preset:hover { transform: scale(1.1); }
@@ -66,14 +70,14 @@
         .author-note { margin-top: 40px; padding: 25px; background: var(--bg); border-radius: 12px; border: 1px dashed var(--accent); opacity: 0.7; }
     </style>
 </head>
-<body class="">
+<body>
 <nav id="sidebar">
     <h2 onclick="location.reload()">천각(天刻) 세계관 도감</h2>
     <button class="btn-action" onclick="toggleDarkMode()" style="margin-bottom:15px;">🌙 다크 모드 전환</button>
     <select id="novel-filter" class="novel-selector" onchange="changeNovel(this.value)"><option value="all">전체 작품 보기</option><option value="기존 소설">기존 소설</option><option value="살기 뱀파">살기 뱀파</option></select>
     
-    <div class="edit-only theme-setter" style="margin-bottom:5px; font-size:0.75rem; font-weight:800; color:var(--sub-text);">테마 프리셋</div>
-    <div class="preset-group edit-only">
+    <div class="theme-setter-label" style="margin-bottom:5px; font-size:0.75rem; font-weight:800; color:var(--sub-text);">테마 프리셋</div>
+    <div class="preset-group">
         <div class="btn-preset" style="background:#1d1d1f;" onclick="updateThemeColor('#1d1d1f')" title="Classic Ink"></div>
         <div class="btn-preset" style="background:#1a237e;" onclick="updateThemeColor('#1a237e')" title="Midnight Blue"></div>
         <div class="btn-preset" style="background:#b71c1c;" onclick="updateThemeColor('#b71c1c')" title="Crimson Red"></div>
@@ -88,7 +92,7 @@
         <button class="btn-action" onclick="copyFullCode()">전체 소스 코드 복사</button>
         <button class="btn-action" onclick="exportData()" style="background: #f0f0f5; border-color: var(--border);">데이터 백업 다운로드</button>
         <button class="btn-action" onclick="copyReaderLink()" style="border-color:#2196F3; color:#2196F3;">독자용 링크 복사</button>
-        <div id="last-update-display" class="update-info">마지막 복사: 2026. 1. 22. 오후 10:17:26</div>
+        <div id="last-update-display" class="update-info">마지막 복사: 2026. 1. 22. 오후 10:25:49</div>
     </div>
 </nav>
 <main>
@@ -165,9 +169,8 @@
     "all": "#b71c1c"
 };
     let darkMode = false;
-    let lastUpdated = "2026. 1. 22. 오후 10:25:49";
+    let lastUpdated = "2026. 1. 22. 오후 10:30:03";
 
-    // 데이터 로드
     const newSaved = localStorage.getItem('chunGakData_v9');
     const savedThemes = localStorage.getItem('chunGakThemes_v9');
     const savedDark = localStorage.getItem('chunGakDark');
@@ -189,20 +192,13 @@
     let totalPages = 2;
 
     function toggleDarkMode() { darkMode = !darkMode; document.body.classList.toggle('dark-mode'); localStorage.setItem('chunGakDark', darkMode); renderPage(); }
-    
-    // 테마 적용 함수 보강
-    function applyTheme(color) {
-        const themeColor = color || '#1d1d1f';
-        document.documentElement.style.setProperty('--accent', themeColor);
-        // 사이드바 카테고리 색상 강제 업데이트를 위해 renderSidebar 호출
-        renderSidebar(); 
-    }
+    function applyTheme(color) { document.documentElement.style.setProperty('--accent', color || '#1d1d1f'); renderSidebar(); }
     
     function updateThemeColor(color) {
         novelThemes[currentNovelFilter] = color;
         localStorage.setItem('chunGakThemes_v9', JSON.stringify(novelThemes));
         applyTheme(color);
-        renderPage(); // 페이지 전체를 다시 그려 색상 적용 확정
+        renderPage();
     }
 
     function renderSidebar() {
@@ -210,21 +206,15 @@
         const search = document.getElementById('search-input').value.toLowerCase();
         let filtered = currentNovelFilter === "all" ? wikiData : wikiData.filter(d => d.novel === currentNovelFilter);
         if(search) filtered = filtered.filter(d => d.title.toLowerCase().includes(search) || d.content.toLowerCase().includes(search));
-        
         const sorted = [];
         categories.forEach((cat, typeIdx) => {
             const items = filtered.filter(d => d.type === typeIdx).sort((a, b) => (a.subCategory || "").localeCompare(b.subCategory || ""));
             sorted.push(...items.map(item => ({...item, origIdx: wikiData.indexOf(item)})));
         });
-
         categories.forEach((cat, typeIdx) => {
             const items = sorted.filter(d => d.type === typeIdx);
             if (items.length > 0) {
-                const catDiv = document.createElement('div'); 
-                catDiv.className = 'side-cat'; 
-                catDiv.style.color = 'var(--accent)'; // 명시적 스타일 지정
-                catDiv.innerText = cat; 
-                menu.appendChild(catDiv);
+                const catDiv = document.createElement('div'); catDiv.className = 'side-cat'; catDiv.style.color = 'var(--accent)'; catDiv.innerText = cat; menu.appendChild(catDiv);
                 items.forEach((item) => {
                     const pNum = sorted.indexOf(item) + 3;
                     const itemDiv = document.createElement('div');
@@ -245,11 +235,9 @@
             const items = filtered.filter(d => d.type === typeIdx).sort((a, b) => (a.subCategory || "").localeCompare(b.subCategory || ""));
             sorted.push(...items.map(item => ({...item, origIdx: wikiData.indexOf(item)})));
         });
-
         totalPages = sorted.length + 2;
         const container = document.getElementById('content'); const editable = isReader ? 'false' : 'true';
         document.getElementById('footer-page-num').innerText = `PAGE ${currentPage}`;
-        
         const selector = document.getElementById('novel-filter');
         const novels = [...new Set(wikiData.map(d => d.novel))];
         selector.innerHTML = '<option value="all">전체 작품 보기</option>';
@@ -287,43 +275,29 @@
         renderSidebar();
     }
     
-    function changeNovel(val) { 
-        currentNovelFilter = val; 
-        applyTheme(novelThemes[val] || '#1d1d1f'); 
-        currentPage = 2; 
-        renderPage(); 
-    }
-    
+    function changeNovel(val) { currentNovelFilter = val; applyTheme(novelThemes[val] || '#1d1d1f'); currentPage = 2; renderPage(); }
     function liveUpdate(idx, field, val) { wikiData[idx][field] = val; localStorage.setItem('chunGakData_v9', JSON.stringify(wikiData)); }
     function goToPage(n) { if (n >= 1 && n <= totalPages) { currentPage = n; renderPage(); } }
     function nextPage() { goToPage(currentPage + 1); }
     function prevPage() { goToPage(currentPage - 1); }
     function jumpToPage() { const val = parseInt(document.getElementById('jump-page-input').value); if (val) goToPage(val); }
     function updateDanger(idx) { const val = prompt("위험도 (1-10)", wikiData[idx].danger || 1); const num = parseInt(val); if(!isNaN(num) && num >= 1 && num <= 10) { wikiData[idx].danger = num; localStorage.setItem('chunGakData_v9', JSON.stringify(wikiData)); renderPage(); } }
-    
     function addNewItem() {
         const typeStr = prompt("0:세계관, 1:캐릭터, 2:몬스터, 3:짜투리, 4:관계도, 5:연대기", "3"); if(typeStr === null) return;
         const novelName = currentNovelFilter === "all" ? prompt("소설 제목", "새 작품") : currentNovelFilter;
         wikiData.push({ novel: novelName, type: parseInt(typeStr), subCategory: "미분류", title: "새 항목", content: "내용 입력", danger: 1, habitat: "", weakness: "", authorMemo: "" });
         localStorage.setItem('chunGakData_v9', JSON.stringify(wikiData));
-        if(!novelThemes[novelName]) novelThemes[novelName] = "#1d1d1f"; 
-        localStorage.setItem('chunGakThemes_v9', JSON.stringify(novelThemes));
+        if(!novelThemes[novelName]) novelThemes[novelName] = "#1d1d1f"; localStorage.setItem('chunGakThemes_v9', JSON.stringify(novelThemes));
         currentNovelFilter = novelName; changeNovel(novelName);
     }
-    
     function exportData() {
         const exportObj = { data: wikiData, themes: novelThemes, lastUpdated: new Date().toLocaleString() };
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 4));
-        const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "천각_도감_백업_" + new Date().toLocaleDateString() + ".json");
-        document.body.appendChild(downloadAnchorNode); downloadAnchorNode.click(); downloadAnchorNode.remove();
-        alert("백업 파일이 다운로드되었습니다!");
+        const downloadAnchorNode = document.createElement('a'); downloadAnchorNode.setAttribute("href", dataStr); downloadAnchorNode.setAttribute("download", "천각_도감_백업_" + new Date().toLocaleDateString() + ".json");
+        document.body.appendChild(downloadAnchorNode); downloadAnchorNode.click(); downloadAnchorNode.remove(); alert("백업 파일이 다운로드되었습니다!");
     }
-
     function copyFullCode() {
-        lastUpdated = new Date().toLocaleString();
-        localStorage.setItem('chunGakTime', lastUpdated);
+        lastUpdated = new Date().toLocaleString(); localStorage.setItem('chunGakTime', lastUpdated);
         let fullHtml = document.documentElement.outerHTML;
         fullHtml = fullHtml.replace(/let wikiData = \[[\s\S]*?\];/, `let wikiData = ${JSON.stringify(wikiData, null, 4)};`);
         fullHtml = fullHtml.replace(/let novelThemes = \{[\s\S]*?\};/, `let novelThemes = ${JSON.stringify(novelThemes, null, 4)};`);
@@ -332,10 +306,7 @@
     }
     function copyReaderLink() { navigator.clipboard.writeText("https://sasayus.github.io/library/?mode=read").then(() => alert("독자 링크 복사 완료!")); }
     function deleteItem(idx) { if(confirm("삭제할까요?")) { wikiData.splice(idx, 1); localStorage.setItem('chunGakData_v9', JSON.stringify(wikiData)); currentPage = 2; renderPage(); } }
-    
-    // 초기 테마 적용
-    applyTheme(novelThemes[currentNovelFilter]); 
-    renderPage();
+    applyTheme(novelThemes[currentNovelFilter]); renderPage();
 </script>
 
 </body></html>
