@@ -1,6 +1,6 @@
 <html lang="ko"><head>
     <meta charset="UTF-8">
-    <title>작가 천각 아카이브 Ver 29.0 (The Final Archon)</title>
+    <title>작가 천각 아카이브 Ver 30.2 (Final Immutable)</title>
     <style>
         :root { 
             --bg: #f5f5f7; --card: #ffffff; --sidebar: #ffffff;
@@ -14,8 +14,11 @@
         body.dark-mode { --bg: #1c1c1e; --card: #2c2c2e; --sidebar: #2c2c2e; --text: #f5f5f7; --border: #3a3a3c; }
         body { font-family: 'Pretendard', sans-serif; background: var(--bg); color: var(--text); display: flex; margin: 0; height: 100vh; overflow: hidden; transition: 0.3s; }
         
+        /* 독자 모드 처리 */
+        body.reader-mode .author-only, body.reader-mode .side-cat-6, body.reader-mode .side-cat-9 { display: none !important; }
+
         /* 사이드바 */
-        nav { width: 300px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 25px 20px; overflow-y: auto; display: flex; flex-direction: column; z-index: 100; }
+        nav { width: 300px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 25px 20px; overflow-y: auto; display: flex; flex-direction: column; z-index: 100; transition: 0.4s; }
         nav h2 { font-size: 1.1rem; border-bottom: 2px solid var(--text); padding-bottom: 15px; margin-bottom: 20px; text-align: center; font-weight: 800; cursor: pointer; }
         .theme-dots { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; }
         .dot { width: 18px; height: 18px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
@@ -24,50 +27,38 @@
         #sidebar-menu { flex: 1; overflow-y: auto; }
         .side-cat { font-size: 0.75rem; color: var(--accent); font-weight: 800; margin-top: 18px; border-bottom: 1px solid var(--border); padding: 8px 0; display: flex; justify-content: space-between; align-items: center; }
         .side-item { font-size: 0.85rem; padding: 10px 14px; cursor: pointer; border-radius: 8px; margin-top: 4px; transition: 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .side-item.active { background: var(--accent); color: #fff; font-weight: 700; }
+        .side-item.active { background: var(--accent); color: #fff; font-weight: 700; box-shadow: var(--shadow); }
 
         /* 메인 영역 */
         main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 60px; align-items: center; position: relative; }
         .wiki-card { background: var(--card); padding: 60px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.03); width: 100%; max-width: 850px; min-height: 800px; border-top: 10px solid var(--accent); position: relative; transition: 0.4s; }
-        .editor { line-height: 2.1; font-size: 1.15rem; outline: none; min-height: 300px; white-space: pre-wrap; padding: 25px; background: rgba(0,0,0,0.015); border-radius: 14px; border: 1px solid var(--border); margin-top: 25px; }
+        .editor { line-height: 2.1; font-size: 1.15rem; outline: none; min-height: 350px; white-space: pre-wrap; padding: 25px; background: rgba(0,0,0,0.015); border-radius: 14px; border: 1px solid var(--border); margin-top: 25px; }
 
-        /* [복구] 0번: 집필 분석 뱃지 */
+        /* 특수 UI 요소들 */
         .diff-badge { padding: 10px 20px; border-radius: 12px; font-size: 0.9rem; font-weight: 900; display: inline-block; margin-bottom: 20px; cursor: pointer; }
         .diff-low { background: #e8f5e9; color: #2e7d32; } .diff-mid { background: #fff8e1; color: #f57f17; } .diff-high { background: #ffebee; color: #d32f2f; }
-
-        /* [복구] 2번: 몬스터 별점(색상 고정) & 증언 */
+        
         .star-box { font-size: 1.5rem; letter-spacing: 5px; cursor: pointer; display: inline-block; }
         .star-gold { color: var(--star-gold) !important; } .star-red { color: var(--star-red) !important; } .star-gray { color: var(--star-gray) !important; }
         .star-rainbow { background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: rainbow 2s infinite linear; }
         @keyframes rainbow { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
-        .info-box { background: #f8f9fa; padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
-        .testimony-box { background: #fff5f5; border-left: 6px solid var(--monster); padding: 15px; border-radius: 12px; margin-top: 15px; font-style: italic; }
 
-        /* [복구] 4번: 가계도(상하 확장 및 캐릭터 점프) */
         .org-wrap { margin-left: 35px; border-left: 2px solid var(--border); padding-left: 20px; position: relative; margin-top: 12px; }
         .org-card { background: #fff; border: 1px solid var(--border); padding: 12px 18px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 8px; display: inline-flex; align-items: center; gap: 10px; min-width: 220px; }
         .org-name { font-weight: 800; cursor: pointer; font-size: 1rem; flex: 1; }
 
-        /* [복구] 6번: 복선 그리드 */
-        .fs-grid { display: grid; grid-template-columns: 50px 1fr 80px 80px; padding: 12px; border-bottom: 1px solid var(--border); align-items: center; font-size: 0.9rem; }
-
-        /* [복구] 5,7,8번: 행동 로그 그리드 */
         .log-grid { display: grid; grid-template-columns: 120px 1fr 40px; gap: 8px; margin-bottom: 8px; background: #f9f9fb; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
-        .log-input { border: 1px solid var(--border); padding: 8px; border-radius: 6px; font-size: 0.85rem; outline: none; }
+        .log-input { border: 1px solid var(--border); padding: 8px; border-radius: 6px; font-size: 0.85rem; outline: none; background: #fff; }
 
-        /* [복구] 측면 세로 책갈피 메모 */
         .side-bookmark { position: absolute; top: 50%; right: -15px; width: 22px; height: 90px; background: var(--bookmark); color: #5d4037; font-weight: 900; writing-mode: vertical-rl; text-align: center; line-height: 22px; border-radius: 6px 0 0 6px; cursor: pointer; z-index: 100; transition: 0.3s; transform: translateY(-50%); font-size: 0.75rem; box-shadow: -2px 0 10px rgba(0,0,0,0.1); }
         .side-memo-box { position: absolute; top: 50%; right: -320px; width: 280px; height: 400px; background: #fff9c4; border-radius: 15px; padding: 25px; box-shadow: 10px 10px 30px rgba(0,0,0,0.1); z-index: 99; transition: 0.3s; outline: none; overflow-y: auto; display: none; transform: translateY(-50%); border-left: 8px solid #fbc02d; font-family: 'Nanum Pen Script', cursive; }
         .side-memo-box.active { right: 5px; display: block; }
         .side-bookmark.active { right: 285px; border-radius: 0 6px 6px 0; }
 
-        /* 작가 전용 툴바 */
-        .author-tools { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--border); padding-top: 20px; margin-top: auto; }
-        .btn-tool { background: var(--card); border: 1px solid var(--border); padding: 10px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.8rem; text-align: center; transition: 0.2s; }
+        .author-tools { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--border); padding-top: 20px; margin-top: auto; }
+        .btn-tool { background: var(--card); border: 1px solid var(--border); padding: 10px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.75rem; text-align: center; transition: 0.2s; }
         .btn-tool:hover { transform: translateY(-2px); }
 
-        /* 서사 대조표 위젯 */
         .widget-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
         .widget-card { background: #fff; width: 90%; max-width: 1000px; height: 80%; border-radius: 24px; padding: 40px; box-shadow: var(--shadow); overflow-y: auto; }
     </style>
@@ -75,27 +66,33 @@
 <body onload="init()">
 
 <nav id="sidebar">
-    <h2 onclick="location.reload()">CHUNGAK ARCHIVE 29.0</h2>
+    <h2 onclick="location.reload()">CHUNGAK ARCHIVE 30.2</h2>
     <div class="theme-dots author-only">
         <div class="dot" style="background:#1d1d1f" onclick="setTheme('#1d1d1f')"></div>
         <div class="dot" style="background:#b71c1c" onclick="setTheme('#b71c1c')"></div>
         <div class="dot" style="background:#1a237e" onclick="setTheme('#1a237e')"></div>
         <div class="dot" style="background:#1b5e20" onclick="setTheme('#1b5e20')"></div>
-        <div class="dot" style="background:#bf9000" onclick="setTheme('#bf9000')"></div>
     </div>
     <select id="novel-selector" class="novel-selector" onchange="switchNovel(this.value)"><option value="all">전체 프로젝트 보기</option><option value="기존 소설">기존 소설</option><option value="1" selected="">1</option></select>
-    <div id="sidebar-menu" style="flex:1;"><div class="side-cat"><span>0. 세계관</span><span onclick="addItem(0)">+</span></div><div class="side-item " onclick="goPage(4)">0. 세계관 초기 항목</div><div class="side-cat"><span>1. 캐릭터</span><span onclick="addItem(1)">+</span></div><div class="side-item " onclick="goPage(5)">1. 캐릭터 초기 항목</div><div class="side-cat"><span>2. 몬스터(공통)</span><span onclick="addItem(2)">+</span></div><div class="side-item " onclick="goPage(3)">스켈레톤</div><div class="side-item " onclick="goPage(6)">2. 몬스터(공통) 초기 항목</div><div class="side-cat"><span>3. 짜투리</span><span onclick="addItem(3)">+</span></div><div class="side-item " onclick="goPage(7)">3. 짜투리 초기 항목</div><div class="side-cat"><span>4. 가계도</span><span onclick="addItem(4)">+</span></div><div class="side-item " onclick="goPage(8)">4. 가계도 초기 항목</div><div class="side-cat"><span>5. 연대기</span><span onclick="addItem(5)">+</span></div><div class="side-item " onclick="goPage(9)">5. 연대기 초기 항목</div><div class="side-cat"><span>6. 복선 현황</span><span onclick="addItem(6)">+</span></div><div class="side-item " onclick="goPage(10)">6. 복선 현황 초기 항목</div><div class="side-cat"><span>7. 스토리보드</span><span onclick="addItem(7)">+</span></div><div class="side-item " onclick="goPage(11)">7. 스토리보드 초기 항목</div><div class="side-cat"><span>8. 멀티버스</span><span onclick="addItem(8)">+</span></div><div class="side-item " onclick="goPage(12)">8. 멀티버스 초기 항목</div><div class="side-cat"><span>9. 연재 현황</span><span onclick="addItem(9)">+</span></div><div class="side-item active" onclick="goPage(13)">9. 연재 현황 초기 항목</div></div>
-    <div class="author-tools">
-        <button class="btn-tool" style="background:var(--accent); color:#fff;" onclick="copyFullSource()">💾 전체 소스 코드 복사</button>
+    <div id="sidebar-menu" style="flex:1;"><div class="side-cat side-cat-0"><span>0. 세계관</span><span class="author-only" onclick="addItem(0)">+</span></div><div class="side-item " onclick="goPage(4)">0. 세계관 초기 항목</div><div class="side-cat side-cat-1"><span>1. 캐릭터</span><span class="author-only" onclick="addItem(1)">+</span></div><div class="side-item " onclick="goPage(5)">1. 캐릭터 초기 항목</div><div class="side-cat side-cat-2"><span>2. 몬스터(공통)</span><span class="author-only" onclick="addItem(2)">+</span></div><div class="side-item " onclick="goPage(3)">스켈레톤</div><div class="side-item " onclick="goPage(6)">2. 몬스터(공통) 초기 항목</div><div class="side-cat side-cat-3"><span>3. 짜투리</span><span class="author-only" onclick="addItem(3)">+</span></div><div class="side-item " onclick="goPage(7)">3. 짜투리 초기 항목</div><div class="side-cat side-cat-4"><span>4. 가계도</span><span class="author-only" onclick="addItem(4)">+</span></div><div class="side-item " onclick="goPage(8)">4. 가계도 초기 항목</div><div class="side-cat side-cat-5"><span>5. 연대기</span><span class="author-only" onclick="addItem(5)">+</span></div><div class="side-item " onclick="goPage(9)">5. 연대기 초기 항목</div><div class="side-cat side-cat-6"><span>6. 복선 현황</span><span class="author-only" onclick="addItem(6)">+</span></div><div class="side-item " onclick="goPage(10)">6. 복선 현황 초기 항목</div><div class="side-cat side-cat-7"><span>7. 스토리보드</span><span class="author-only" onclick="addItem(7)">+</span></div><div class="side-item " onclick="goPage(11)">7. 스토리보드 초기 항목</div><div class="side-cat side-cat-8"><span>8. 멀티버스</span><span class="author-only" onclick="addItem(8)">+</span></div><div class="side-item " onclick="goPage(12)">8. 멀티버스 초기 항목</div><div class="side-cat side-cat-9"><span>9. 연재 현황</span><span class="author-only" onclick="addItem(9)">+</span></div><div class="side-item " onclick="goPage(13)">9. 연재 현황 초기 항목</div></div>
+    
+    <div class="author-tools author-only">
+        <button class="btn-tool" style="background:var(--accent); color:#fff;" onclick="copyFullSource()">💾 전체 소스 복사</button>
+        <button class="btn-tool" style="color:var(--novel);" onclick="copyReaderLink()">🔗 독자용 링크 복사</button>
         <button class="btn-tool" onclick="toggleNarrativeTable()">📊 서사 대조표</button>
         <button class="btn-tool" style="color:var(--status-green);" onclick="createNewProject()">✚ 새 소설 추가</button>
         <button class="btn-tool" onclick="exportData()">데이터 백업(JSON)</button>
-        <button class="btn-tool" style="color:var(--rel-red);" onclick="deleteEntireProject()">⚠️ 전체 프로젝트 삭제</button>
+        <button class="btn-tool" style="color:var(--rel-red);" onclick="deleteEntireProject()">⚠️ 프로젝트 삭제</button>
     </div>
 </nav>
 
 <main>
-    <div id="main-card-slot"><div class="wiki-card"><div style="font-size:0.75rem; color:var(--sub-text); text-align:right;">[1] 9. 연재 현황</div><h1 contenteditable="true" oninput="update('title', this.innerText)">9. 연재 현황 초기 항목</h1><div id="m-tab" class="side-bookmark" onclick="toggleMemo()">MEMO</div><div id="m-box" class="side-memo-box" contenteditable="true" oninput="update('memo', this.innerText)"></div><button style="position:absolute; top:20px; left:20px; border:none; background:none; color:red; cursor:pointer; font-weight:900; opacity:0.3;" onclick="deleteItem()">✕ DELETE</button><div style="background:#f0f0f5; color:var(--accent); padding:4px 12px; border-radius:20px; font-size:0.7rem; font-weight:800; display:inline-block; margin-bottom:10px;" contenteditable="true" oninput="update('subCat', this.innerText)">소분류...</div><div style="display:flex; gap:10px; margin-bottom:20px;"><button class="btn-tool" style="flex:1" onclick="inStat('munCount')">문피아 0자</button><button class="btn-tool" style="flex:1" onclick="inStat('novCount')">노벨피아 0자</button></div><div class="editor" contenteditable="true" oninput="update('content', this.innerText)"></div></div></div>
+    <div id="main-card-slot"><div class="wiki-card"><div style="font-size:0.75rem; color:var(--sub-text); text-align:right;">[기존 소설] 0. 세계관</div><h1 contenteditable="true" oninput="update('title', this.innerText)">세계관 개요</h1><div id="m-tab" class="side-bookmark author-only" onclick="toggleMemo()">MEMO</div><div id="m-box" class="side-memo-box" contenteditable="true" oninput="update('memo', this.innerText)"></div><button class="author-only" style="position:absolute; top:20px; left:20px; border:none; background:none; color:red; cursor:pointer; font-weight:900; opacity:0.3;" onclick="deleteItem()">✕ DELETE</button><div style="background:#f0f0f5; color:var(--accent); padding:4px 12px; border-radius:20px; font-size:0.7rem; font-weight:800; display:inline-block; margin-bottom:10px;" contenteditable="true" oninput="update('subCat', this.innerText)">소분류...</div><div class="diff-badge diff-low" onclick="cycleAcc(0)">판별: 집필 가능</div>
+                   <div style="background:#f8f9fa; border-left:6px solid var(--accent); padding:20px; border-radius:12px; margin-bottom:20px;" contenteditable="true" oninput="update('analysis', this.innerText)">◈ 집필 분석
+- 판별등급: 
+- 핵심 키워드: 
+- 초보작가 주의사항: 
+- 소설 주의사항: </div><div class="editor" contenteditable="true" oninput="update('content', this.innerText)">천각 작가의 우주.</div></div></div>
 </main>
 
 <div id="narrative-modal" class="widget-overlay" onclick="toggleNarrativeTable()">
@@ -118,20 +115,18 @@
     let currentNovel = localStorage.getItem('currentNovel') || "all";
     let currentPage = 1;
 
-    // [복구 마이그레이션] 모든 버전의 저장소를 뒤져 알맹이 보호
     function init() {
-        const keys = ['chunGakData_v28','chunGakData_v27','chunGakData_v26','chunGakData_v23','chunGakData_v21','chunGakData_v18','chunGakData_v15','chunGakData_v9'];
+        if (window.location.search.includes('mode=read')) document.body.classList.add('reader-mode');
+        const keys = ['chunGakData_v30','chunGakData_v29','chunGakData_v28','chunGakData_v27','chunGakData_v26','chunGakData_v23'];
         let recovered = null;
         for (let key of keys) {
             const d = localStorage.getItem(key);
             if (d) { recovered = JSON.parse(d); break; }
         }
         wikiData = recovered || [
-            { novel: "기존 소설", type: 0, title: "세계관 개요", content: "천각 작가의 우주.", analysis: analysisTemplate, accessibility: "하" },
-            { novel: "기존 소설", type: 1, title: "로인 카밀루스", content: "주역 캐릭터." },
-            { novel: "기존 소설", type: 2, title: "스켈레톤", content: "기초 언데드.", danger: 2, habitat: "공동묘지", weakness: "성수", testimony: "뼈 소리..." },
-            { novel: "기존 소설", type: 5, title: "연대기 초기", actionLogs: [{char:"", act:""}] },
-            { novel: "기존 소설", type: 9, title: "연재 현황", munCount: 0, novCount: 0 }
+            { novel: "기존 소설", type: 0, title: "세계관 개요", analysis: analysisTemplate, accessibility: "하" },
+            { novel: "기존 소설", type: 1, title: "로인 카밀루스", content: "주역." },
+            { novel: "기존 소설", type: 2, title: "스켈레톤", danger: 2, testimony: "뼈 소리..." }
         ];
         save(); updateSelector(); renderSidebar(); renderPage();
     }
@@ -141,11 +136,10 @@
         const item = wikiData[currentPage - 1];
         if (!item) return;
 
-        let ui = `<div id="m-tab" class="side-bookmark" onclick="toggleMemo()">MEMO</div><div id="m-box" class="side-memo-box" contenteditable="true" oninput="update('memo', this.innerText)">${item.memo || ''}</div>`;
-        ui += `<button style="position:absolute; top:20px; left:20px; border:none; background:none; color:red; cursor:pointer; font-weight:900; opacity:0.3;" onclick="deleteItem()">✕ DELETE</button>`;
+        let ui = `<div id="m-tab" class="side-bookmark author-only" onclick="toggleMemo()">MEMO</div><div id="m-box" class="side-memo-box" contenteditable="true" oninput="update('memo', this.innerText)">${item.memo || ''}</div>`;
+        ui += `<button class="author-only" style="position:absolute; top:20px; left:20px; border:none; background:none; color:red; cursor:pointer; font-weight:900; opacity:0.3;" onclick="deleteItem()">✕ DELETE</button>`;
         ui += `<div style="background:#f0f0f5; color:var(--accent); padding:4px 12px; border-radius:20px; font-size:0.7rem; font-weight:800; display:inline-block; margin-bottom:10px;" contenteditable="true" oninput="update('subCat', this.innerText)">${item.subCat || '소분류...'}</div>`;
 
-        // 0. 세계관 - 뱃지 & 통합 뷰
         if (item.type === 0) {
             const acc = item.accessibility || "하";
             const bClass = acc === '상' ? 'diff-high' : (acc === '중' ? 'diff-mid' : 'diff-low');
@@ -153,51 +147,46 @@
                    <div style="background:#f8f9fa; border-left:6px solid var(--accent); padding:20px; border-radius:12px; margin-bottom:20px;" contenteditable="true" oninput="update('analysis', this.innerText)">${item.analysis || analysisTemplate}</div>`;
         }
 
-        // 1, 2. 캐릭터/몬스터 (별점 색상 및 증언 복구)
-        if (item.type === 1 || item.type === 2) {
+        if (item.type === 2 || item.type === 1) {
             ui += `<div class="info-grid"><div class="info-box"><small>배경/생태</small><div contenteditable="true" oninput="update('habitat',this.innerText)">${item.habitat||''}</div></div><div class="info-box"><small>약점/능력</small><div contenteditable="true" oninput="update('weakness',this.innerText)">${item.weakness||''}</div></div></div>`;
             if (item.type === 2) {
                 const d = item.danger || 1;
                 let sClass = 'star-gold';
                 if (d >= 10) sClass = 'star-rainbow'; else if (d === 9) sClass = 'star-gray'; else if (d >= 6) sClass = 'star-red';
                 ui += `<div class="star-box ${sClass}" onclick="cycleDanger(${currentPage-1})">${'★'.repeat(d)}${'☆'.repeat(10-d)}</div>
-                       <div style="background:#fff5f5; border-left:6px solid var(--monster); padding:15px; border-radius:12px;"><b>생존자의 증언:</b><div contenteditable="true" oninput="update('testimony', this.innerText)">${item.testimony||''}</div></div>`;
+                       <div style="background:#fff5f5; border-left:6px solid var(--monster); padding:15px; border-radius:12px;"><b>증언:</b><div contenteditable="true" oninput="update('testimony', this.innerText)">${item.testimony||''}</div></div>`;
             }
         }
 
-        // 4. 가계도 (상하 노드 및 텔레포트)
         if (item.type === 4) {
-            if(!item.nodes) item.nodes = [{id:Date.now(), name:"중심 인물", color:"var(--rel-black)", children:[]}];
+            if(!item.nodes) item.nodes = [{id:Date.now(), name:"로인 카밀루스", color:"var(--rel-pink)", children:[]}];
             ui += `<div id="org-tree">${renderNodes(item.nodes)}</div>`;
         }
 
-        // 6. 복선 현황 (그리드)
         if (item.type === 6) {
             if(!item.plots) item.plots = [{solved:false, desc:"", sown:"", reaped:""}];
             ui += `<div style="border:1px solid var(--border); border-radius:12px; overflow:hidden; margin:15px 0;">
-                <div class="fs-grid" style="background:#fafafa; font-weight:800;"><span>회수</span><span>복선 내용</span><span>뿌림</span><span>회수</span></div>
-                ${item.plots.map((p,i)=>`<div class="fs-grid"><input type="checkbox" ${p.solved?'checked':''} onchange="updatePlot(${i},'solved',this.checked)"><input style="border:none;outline:none;" value="${p.desc}" oninput="updatePlot(${i},'desc',this.value)"><input style="border:none;outline:none;text-align:center" value="${p.sown}" oninput="updatePlot(${i},'sown',this.value)"><input style="border:none;outline:none;text-align:center" value="${p.reaped}" oninput="updatePlot(${i},'reaped',this.value)"></div>`).join('')}
-            </div><button class="btn-tool" onclick="addPlot()">✚ 복선 추가</button>`;
+                <div style="display:grid; grid-template-columns:50px 1fr 80px 80px; padding:10px; background:#fafafa; font-weight:800; font-size:0.8rem;"><span>회수</span><span>내용</span><span>뿌림</span><span>회수</span></div>
+                ${item.plots.map((p,i)=>`<div style="display:grid; grid-template-columns:50px 1fr 80px 80px; padding:10px; border-top:1px solid var(--border); align-items:center;"><input type="checkbox" ${p.solved?'checked':''} onchange="updatePlot(${i},'solved',this.checked)"><input style="border:none;outline:none;" value="${p.desc}" oninput="updatePlot(${i},'desc',this.value)"><input style="border:none;outline:none;text-align:center" value="${p.sown}" oninput="updatePlot(${i},'sown',this.value)"><input style="border:none;outline:none;text-align:center" value="${p.reaped}" oninput="updatePlot(${i},'reaped',this.value)"></div>`).join('')}
+            </div><button class="btn-tool author-only" onclick="addPlot()">✚ 복선 추가</button>`;
         }
 
-        // 5, 7, 8. 연대기/스토리/멀티버스 - 로그 & 점프
         if ([5, 7, 8].includes(item.type)) {
             if(!item.actionLogs) item.actionLogs = [{char:"", act:""}];
             const chars = wikiData.filter(d => d.type === 1);
-            ui += `<div style="margin-bottom:15px;">${chars.map(c=>`<span style="background:var(--accent); color:#fff; padding:4px 10px; border-radius:6px; font-size:0.75rem; margin-right:5px; cursor:pointer;" onclick="jumpTo('${c.title}')"># ${c.title}</span>`).join('')}</div>
-                   <div style="margin:15px 0;">${item.actionLogs.map((l,i)=>`<div class="log-grid"><input class="log-input" placeholder="인물" value="${l.char}" oninput="updateLog(${i},'char',this.value)"><input class="log-input" placeholder="행동 기록" value="${l.act}" oninput="updateLog(${i},'act',this.value)"><button style="border:none; background:none; color:red; cursor:pointer;" onclick="delLog(${i})">✕</button></div>`).join('')}<button class="btn-tool" onclick="addLog()">✚ 로그 추가</button></div>`;
+            ui += `<div class="author-only" style="margin-bottom:15px;">${chars.map(c=>`<span style="background:var(--accent); color:#fff; padding:4px 10px; border-radius:6px; font-size:0.75rem; margin-right:5px; cursor:pointer;" onclick="jumpTo('${c.title}')"># ${c.title}</span>`).join('')}</div>
+                   <div style="margin:15px 0;">${item.actionLogs.map((l,i)=>`<div class="log-grid"><input class="log-input" placeholder="인물" value="${l.char}" oninput="updateLog(${i},'char',this.value)"><input class="log-input" placeholder="행동 기록" value="${l.act}" oninput="updateLog(${i},'act',this.value)"><button class="author-only" style="border:none; background:none; color:red; cursor:pointer;" onclick="delLog(${i})">✕</button></div>`).join('')}<button class="btn-tool author-only" onclick="addLog()">✚ 로그 추가</button></div>`;
         }
 
-        // 9. 연재 현황
         if (item.type === 9) {
-            ui += `<div style="display:flex; gap:10px; margin-bottom:20px;"><button class="btn-tool" style="flex:1" onclick="inStat('munCount')">문피아 ${item.munCount||0}자</button><button class="btn-tool" style="flex:1" onclick="inStat('novCount')">노벨피아 ${item.novCount||0}자</button></div>`;
+            ui += `<div class="author-only" style="display:flex; gap:10px; margin-bottom:20px;"><button class="btn-tool" style="flex:1" onclick="inStat('munCount')">문피아 ${item.munCount||0}자</button><button class="btn-tool" style="flex:1" onclick="inStat('novCount')">노벨피아 ${item.novCount||0}자</button></div>`;
         }
 
         slot.innerHTML = `<div class="wiki-card"><div style="font-size:0.75rem; color:var(--sub-text); text-align:right;">[${item.novel}] ${categories[item.type]}</div><h1 contenteditable="true" oninput="update('title', this.innerText)">${item.title}</h1>${ui}<div class="editor" contenteditable="true" oninput="update('content', this.innerText)">${item.content || ''}</div></div>`;
     }
 
     // --- [로직 핵심] ---
-    function renderNodes(nodes) { return nodes.map(n => `<div class="org-wrap"><div class="org-card"><div style="width:12px; height:12px; border-radius:50%; background:${n.color}; cursor:pointer;" onclick="cycleColor(${n.id})"></div><span class="org-name" onclick="jumpTo('${n.name}')">${n.name}</span><button style="border:none;background:none;cursor:pointer;" onclick="addNode(${n.id})">＋</button><button style="border:none;background:none;cursor:pointer;color:red;" onclick="delNode(${n.id})">－</button></div>${n.children?renderNodes(n.children):''}</div>`).join(''); }
+    function renderNodes(nodes) { return nodes.map(n => `<div class="org-wrap"><div class="org-card"><div style="width:12px; height:12px; border-radius:50%; background:${n.color}; cursor:pointer;" onclick="cycleColor(${n.id})"></div><span class="org-name" onclick="jumpTo('${n.name}')">${n.name}</span><button class="author-only" style="border:none;background:none;cursor:pointer;" onclick="addNode(${n.id})">＋</button><button class="author-only" style="border:none;background:none;cursor:pointer;color:red;" onclick="delNode(${n.id})">－</button></div>${n.children?renderNodes(n.children):''}</div>`).join(''); }
     function cycleAcc(i) { const o=["하","중","상"]; wikiData[i].accessibility=o[(o.indexOf(wikiData[i].accessibility||"하")+1)%3]; save(); renderPage(); }
     function cycleDanger(i) { let d=wikiData[i].danger||1; wikiData[i].danger=d>=10?1:d+1; save(); renderPage(); }
     function cycleColor(id) { const cs=["var(--rel-black)","var(--rel-pink)","var(--rel-blue)","var(--rel-red)"]; const f=(l)=>l.forEach(n=>{if(n.id===id)n.color=cs[(cs.indexOf(n.color)+1)%4];else f(n.children);}); f(wikiData[currentPage-1].nodes); save(); renderPage(); }
@@ -213,7 +202,7 @@
         modal.style.display = 'flex';
     }
     function update(f,v) { wikiData[currentPage-1][f]=v; save(); if(f==='title') renderSidebar(); }
-    function save() { localStorage.setItem('chunGakData_v29', JSON.stringify(wikiData)); }
+    function save() { localStorage.setItem('chunGakData_v30.2', JSON.stringify(wikiData)); }
     function switchNovel(n) { currentNovel=n; localStorage.setItem('currentNovel',n); updateSelector(); renderSidebar(); currentPage=1; renderPage(); }
     function setTheme(c) { document.documentElement.style.setProperty('--accent',c); localStorage.setItem('chunGakTheme', c); }
     function jumpTo(name) { const idx=wikiData.findIndex(d=>d.type===1 && d.title===name); if(idx!==-1){ currentPage=idx+1; renderPage(); renderSidebar(); } }
@@ -221,8 +210,18 @@
     function toggleMemo() { document.getElementById('m-tab').classList.toggle('active'); document.getElementById('m-box').classList.toggle('active'); }
     function addNode(id) { const f=(l)=>l.forEach(n=>n.id===id?n.children.push({id:Date.now(), name:"새 인물", color:"var(--rel-black)", children:[]}):f(n.children)); f(wikiData[currentPage-1].nodes); save(); renderPage(); }
     function delNode(id) { const f=(l)=>{const i=l.findIndex(n=>n.id===id); if(i!==-1)l.splice(i,1); else l.forEach(n=>f(n.children));}; f(wikiData[currentPage-1].nodes); save(); renderPage(); }
+    function copyFullSource() { navigator.clipboard.writeText(document.documentElement.outerHTML); alert("전체 소스 복사 완료!"); }
+    
+    // [수정] 🔗 독자용 링크 복사: GitHub 공식 웹 주소 기준
+    function copyReaderLink() {
+        const githubURL = "https://sasayus.github.io/library/";
+        const readerLink = githubURL + "?mode=read";
+        navigator.clipboard.writeText(readerLink).then(() => {
+            alert("독자용 웹 링크(GitHub)가 복사되었습니다!\n" + readerLink);
+        });
+    }
+
     function exportData() { const b=new Blob([JSON.stringify(wikiData)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`backup.json`; a.click(); }
-    function copyFullSource() { navigator.clipboard.writeText(document.documentElement.outerHTML); alert("전체 소스 복사 완료! index.html에 덮어씌우세요."); }
     function updateSelector() {
         const sel = document.getElementById('novel-selector'); const ns = [...new Set(wikiData.map(d=>d.novel))].filter(n=>n);
         sel.innerHTML = '<option value="all">전체 프로젝트 보기</option>'; ns.forEach(n=>sel.innerHTML+=`<option value="${n}" ${currentNovel===n?'selected':''}>${n}</option>`);
@@ -233,7 +232,7 @@
         [0,1,2,3,4,5,6,7,8,9].forEach(type => {
             const items = filtered.filter(d=>d.type===type);
             if (items.length === 0 && type !== 2) return;
-            menu.innerHTML += `<div class="side-cat"><span>${categories[type]}</span><span onclick="addItem(${type})">+</span></div>`;
+            menu.innerHTML += `<div class="side-cat side-cat-${type}"><span>${categories[type]}</span><span class="author-only" onclick="addItem(${type})">+</span></div>`;
             items.forEach(item => { const idx=wikiData.indexOf(item); menu.innerHTML += `<div class="side-item ${idx===currentPage-1?'active' :''}" onclick="goPage(${idx+1})">${item.title}</div>`; });
         });
     }
