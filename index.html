@@ -1,6 +1,6 @@
 <html lang="ko"><head>
     <meta charset="UTF-8">
-    <title>작가 천각(天刻) 아카이브 Ver 4.6</title>
+    <title>작가 천각 아카이브 Ver 4.7</title>
     <style>
         :root { 
             --bg: #f5f5f7; --card: #ffffff; --sidebar: #ffffff;
@@ -22,7 +22,7 @@
         body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); display: flex; margin: 0; height: 100vh; overflow: hidden; transition: 0.3s; }
         
         /* 독자 모드 처리 */
-        body.reader-mode .nav-btns, body.reader-mode .btn-add-item, body.reader-mode .zoom-controls, body.reader-mode .rel-picker, body.reader-mode .btn-node-del, body.reader-mode .btn-node-add, body.reader-mode .btn-cast-del, body.reader-mode .diff-badge, body.reader-mode .analysis-box, body.reader-mode .author-only { display: none !important; }
+        body.reader-mode .nav-btns, body.reader-mode .btn-add-item, body.reader-mode .zoom-controls, body.reader-mode .rel-picker, body.reader-mode .btn-node-del, body.reader-mode .btn-node-add, body.reader-mode .btn-cast-del, body.reader-mode .diff-badge, body.reader-mode .analysis-box, body.reader-mode .preset-group, body.reader-mode .author-only { display: none !important; }
 
         nav { width: 300px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 25px 20px; overflow-y: auto; display: flex; flex-direction: column; transition: 0.3s; position: relative; z-index: 100; box-shadow: 2px 0 10px rgba(0,0,0,0.02); }
         nav.collapsed { margin-left: -300px; }
@@ -31,6 +31,11 @@
         nav h2 { color: var(--text); font-size: 1.1rem; border-bottom: 2px solid var(--text); padding-bottom: 15px; margin-bottom: 20px; text-align: center; font-weight: 800; margin-top: 40px; cursor: pointer; }
         .novel-selector { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 15px; font-weight: 700; background: var(--card); color: var(--text); border-left: 5px solid var(--accent); box-shadow: var(--shadow); appearance: none; cursor: pointer; }
         
+        /* 테마 프리셋 복구 */
+        .preset-group { display: flex; gap: 8px; margin-bottom: 25px; justify-content: center; }
+        .btn-preset { width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn-preset:hover { transform: scale(1.1); }
+
         #sidebar-menu { flex: 1; overflow-y: auto; margin-bottom: 20px; }
         .side-cat { font-size: 0.75rem; color: var(--accent); font-weight: 800; margin-top: 18px; margin-bottom: 8px; text-transform: uppercase; border-bottom: 1px solid var(--border); padding: 8px 0; display: flex; justify-content: space-between; align-items: center; }
         .cat-title-box { cursor: pointer; flex: 1; }
@@ -39,11 +44,14 @@
         .cat-items { overflow: hidden; margin-top: 5px; }
         .cat-items.hidden { display: none; }
         .side-item { font-size: 0.85rem; padding: 10px 14px; cursor: pointer; border-radius: 8px; color: var(--text); margin-bottom: 4px; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: 0.2s; }
+        .side-item:hover { background: var(--bg); opacity: 1; }
         .side-item.active { background: var(--accent); color: #fff; font-weight: 700; opacity: 1; box-shadow: var(--shadow); }
         
         .nav-btns { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--border); padding-top: 20px; }
         .btn-action { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 12px; cursor: pointer; border-radius: 12px; font-size: 0.85rem; font-weight: 700; transition: 0.3s; box-shadow: var(--shadow); text-align: center; }
+        .btn-action:hover { transform: var(--btn-hover); background: var(--bg); }
         .btn-main-action { background: var(--accent); color: white; border: none; }
+        .btn-danger { color: #d32f2f; border-color: #fecaca; }
 
         main { flex: 1; display: flex; flex-direction: column; background: var(--bg); position: relative; overflow: hidden; }
         #page-container { flex: 1; overflow-y: auto; padding: 50px; display: flex; justify-content: center; }
@@ -51,35 +59,31 @@
         #content.wide { max-width: 95%; }
 
         .wiki-card { background: var(--card); padding: 60px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.04); min-height: 700px; position: relative; border-top: 8px solid var(--accent); transition: 0.3s; }
-        
-        /* [수정] 본문 글상자 규격 통일 */
         .editable-area { line-height: 2.1; font-size: 1.15rem; outline: none; min-height: 350px; white-space: pre-wrap; background: rgba(0,0,0,0.015); border: 1px solid var(--border); border-radius: 14px; padding: 35px; transition: 0.3s; margin-bottom: 20px; }
         .editable-area:focus { background: var(--card); border-color: var(--accent); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
 
-        /* [수정] 작가 메모란 축소 */
         .author-note { margin-top: 30px; padding: 15px 25px; background: var(--bg); border: 1px dashed var(--accent); opacity: 0.8; border-radius: 12px; font-size: 0.9rem; }
-        .author-note .info-label { font-size: 0.75rem; margin-bottom: 8px; }
-
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .info-box { background: var(--bg); padding: 15px 20px; border-radius: 10px; border: 1px solid var(--border); }
         .info-label { font-size: 0.7rem; color: var(--sub-text); font-weight: 800; text-transform: uppercase; margin-bottom: 5px; display: block; }
         .info-val { font-size: 1rem; font-weight: 700; outline: none; }
 
-        /* [수정] 위험도 강조 로직 적용 */
         .high-danger-card { border-top-color: var(--monster-red) !important; box-shadow: 0 15px 50px rgba(215, 0, 21, 0.1) !important; }
         .high-danger-text { color: var(--monster-red) !important; }
         .danger-badge-red { background: var(--monster-red) !important; color: white !important; }
 
-        .diff-badge { padding: 10px 20px; border-radius: 12px; font-size: 0.9rem; font-weight: 900; display: inline-block; margin-bottom: 25px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid transparent; }
+        .diff-badge { padding: 10px 20px; border-radius: 12px; font-size: 0.9rem; font-weight: 900; display: inline-block; margin-bottom: 25px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.2s; border: 2px solid transparent; }
         .diff-high { background: #ffebee; color: #d32f2f; border-color: #ffcdd2; }
         .diff-mid { background: #fff8e1; color: #f57f17; border-color: #ffecb3; }
         .diff-low { background: #e8f5e9; color: #2e7d32; border-color: #c8e6c9; }
-        
         .analysis-box { background: #f8f9fa; border: 1px solid var(--border); border-radius: 14px; padding: 30px; margin-bottom: 35px; border-left: 10px solid var(--accent); }
 
         .stats-dashboard { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px; }
         .stats-card { background: #f8f9fa; padding: 20px; border-radius: 14px; border-left: 6px solid var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
         .stats-val { font-size: 1.6rem; font-weight: 900; color: var(--accent); }
+
+        .secret-bookmark { width: 35px; height: 70px; position: absolute; top: 40px; right: -18px; background: var(--accent); border-radius: 0 6px 6px 0; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 100; box-shadow: 4px 4px 15px rgba(0,0,0,0.1); transition: 0.3s; }
+        .secret-bookmark::after { content: '✎'; color: white; font-size: 1.2rem; }
 
         .page-footer { height: 70px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 50px; background: var(--card); }
         .zoom-controls { position: absolute; top: 20px; right: 60px; display: flex; gap: 8px; z-index: 50; }
@@ -87,14 +91,36 @@
         
         .chronicle-cast { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; padding: 20px; background: var(--bg); border-radius: 12px; border: 1px dashed var(--border); }
         .cast-node { border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; background: var(--card); font-size: 0.9rem; font-weight: 800; cursor: pointer; position: relative; }
+        .hierarchy-container { display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 40px 0; width: 100%; }
+        .hier-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; width: 100%; }
+        .hier-box { position: relative; display: flex; flex-direction: column; align-items: center; }
+        .hier-node { border: 2.5px solid var(--accent); padding: 15px 35px; border-radius: 12px; background: var(--card); min-width: 160px; text-align: center; cursor: pointer; font-weight: 800; box-shadow: var(--shadow); }
+        .hier-sub-node { border: 2px solid var(--border); padding: 12px 30px; border-radius: 10px; background: var(--bg); min-width: 150px; text-align: center; cursor: pointer; font-weight: 700; }
+        .rel-line { width: 5px; height: 35px; background: var(--border); border-radius: 2px; }
+        .rel-line.red { background: var(--rel-red); }
+        .rel-line.blue { background: var(--rel-blue); }
+        .rel-line.pink { background: var(--rel-pink); }
+        .rel-line.black { background: var(--rel-black); }
+        .rel-picker { display: flex; gap: 4px; margin-top: 5px; }
+        .color-dot { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); }
+        .btn-node-del { position: absolute; top: -8px; right: -8px; background: #ff3b30; color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: none; }
+        .hier-box:hover .btn-node-del { display: block; }
+        .btn-node-add { background: var(--bg); border: 2px dashed var(--border); color: var(--sub-text); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 800; margin: 10px; }
         .solved-card { opacity: 0.6; filter: grayscale(50%); }
     </style>
 </head>
 <body>
 <button class="toggle-btn" onclick="toggleSidebar()">≡</button>
 <nav id="sidebar">
-    <h2 onclick="location.reload()">천각 아카이브 Ver 4.6</h2>
+    <h2 onclick="location.reload()">천각 아카이브 Ver 4.7</h2>
     <button class="btn-action author-only" onclick="toggleDarkMode()" style="margin-bottom:15px;">🌙 다크 모드 전환</button>
+    <div class="preset-group">
+        <div class="btn-preset" style="background:#1d1d1f;" onclick="updateThemeColor('#1d1d1f')"></div>
+        <div class="btn-preset" style="background:#1a237e;" onclick="updateThemeColor('#1a237e')"></div>
+        <div class="btn-preset" style="background:#b71c1c;" onclick="updateThemeColor('#b71c1c')"></div>
+        <div class="btn-preset" style="background:#1b5e20;" onclick="updateThemeColor('#1b5e20')"></div>
+        <div class="btn-preset" style="background:#bf9000;" onclick="updateThemeColor('#bf9000')"></div>
+    </div>
     <select id="novel-filter" class="novel-selector" onchange="changeNovel(this.value)"><option value="all">전체 프로젝트 보기</option><option value="기존 소설">기존 소설</option><option value="살기 뱀파">살기 뱀파</option><option value="고귀한 뱀파이어">고귀한 뱀파이어</option></select>
     <div id="sidebar-menu"><div class="side-cat"><div class="cat-title-box">0. 세계관</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">새 항목</div><div class="side-item">세계관 개요</div></div><div class="side-cat"><div class="cat-title-box">1. 캐릭터</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">로인 카밀루스&nbsp;</div><div class="side-item">주요 등장인물</div></div><div class="side-cat"><div class="cat-title-box">2. 몬스터(공통)</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">스켈레톤</div></div><div class="side-cat"><div class="cat-title-box">3. 짜투리</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">새로운 이야기</div></div><div class="side-cat"><div class="cat-title-box">4. 관계도(가계도)</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">인물 관계도</div></div><div class="side-cat"><div class="cat-title-box">5. 연대기</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"></div><div class="side-cat"><div class="cat-title-box">6. 복선 현황</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">복선 체크리스트</div></div><div class="side-cat"><div class="cat-title-box">7. 에피소드 보드</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">메인 에피소드</div></div><div class="side-cat"><div class="cat-title-box">8. 멀티 연대기</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">병렬 연대기</div></div><div class="side-cat"><div class="cat-title-box">9. 연재 현황</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">데일리 연재로그</div></div></div>
     <div class="nav-btns">
@@ -108,7 +134,7 @@
 <main>
     <div id="page-container"><div id="content">
         <div class="secret-bookmark author-only" onclick="toggleSecretMemo()"></div>
-        <div id="main-card-slot"><div class="wiki-card"><h1>Table of Contents</h1><div class="side-cat" style="border-bottom:2px solid var(--accent); color:var(--accent); margin-top:25px;">0. 세계관</div><div style="display:flex; justify-content:space-between; margin:12px 0 0 20px; cursor:pointer; font-weight:600;" onclick="goToPage(3)">새 항목<span style="opacity:0.3;">p.3</span></div><div style="display:flex; justify-content:space-between; margin:12px 0 0 20px; cursor:pointer; font-weight:600;" onclick="goToPage(4)">세계관 개요<span style="opacity:0.3;">p.4</span></div><div class="side-cat" style="border-bottom:2px solid var(--accent); color:var(--accent); margin-top:25px;">1. 캐릭터</div><div style="display:flex; justify-content:space-between; margin:12px 0 0 20px; cursor:pointer; font-weight:600;" onclick="goToPage(5)">로인 카밀루스&nbsp;<span style="opacity:0.3;">p.5</span></div><div style="display:flex; justify-content:space-between; margin:12px 0 0 20px; cursor:pointer; font-weight:600;" onclick="goToPage(6)">주요 등장인물<span style="opacity:0.3;">p.6</span></div><div class="side-cat" style="border-bottom:2px solid var(--accent); color:var(--accent); margin-top:25px;">2. 몬스터(공통)</div><div style="display:flex; justify-content:space-between; margin:12px 0 0 20px; cursor:pointer; font-weight:600;" onclick="goToPage(7)">스켈레톤<span style="opacity:0.3;">p.7</span></div><div class="side-cat" style="border-bottom:2px solid var(--accent); color:var(--accent); margin-top:25px;">3. 짜투리</div><div style="display:flex; justify-content:space-between; margin:12px 0 0 20px; cursor:pointer; font-weight:600;" onclick="goToPage(8)">새로운 이야기<span style="opacity:0.3;">p.8</span></div><div class="side-cat" style="border-bottom:2px solid var(--accent); color:var(--accent); margin-top:25px;">4. 관계도(가계도)</div><div style="display:flex; justify-content:space-between; margin:12px 0 0 20px; cursor:pointer; font-weight:600;" onclick="goToPage(9)">인물 관계도<span style="opacity:0.3;">p.9</span></div><div class="side-cat" style="border-bottom:2px solid var(--accent); color:var(--accent); margin-top:25px;">6. 복선 현황</div><div style="display:flex; justify-content:space-between; margin:12px 0 0 20px; cursor:pointer; font-weight:600;" onclick="goToPage(10)">복선 체크리스트<span style="opacity:0.3;">p.10</span></div><div class="side-cat" style="border-bottom:2px solid var(--accent); color:var(--accent); margin-top:25px;">7. 에피소드 보드</div><div style="display:flex; justify-content:space-between; margin:12px 0 0 20px; cursor:pointer; font-weight:600;" onclick="goToPage(11)">메인 에피소드<span style="opacity:0.3;">p.11</span></div><div class="side-cat" style="border-bottom:2px solid var(--accent); color:var(--accent); margin-top:25px;">8. 멀티 연대기</div><div style="display:flex; justify-content:space-between; margin:12px 0 0 20px; cursor:pointer; font-weight:600;" onclick="goToPage(12)">병렬 연대기<span style="opacity:0.3;">p.12</span></div><div class="side-cat" style="border-bottom:2px solid var(--accent); color:var(--accent); margin-top:25px;">9. 연재 현황</div><div style="display:flex; justify-content:space-between; margin:12px 0 0 20px; cursor:pointer; font-weight:600;" onclick="goToPage(13)">데일리 연재로그<span style="opacity:0.3;">p.13</span></div></div></div>
+        <div id="main-card-slot"><div class="wiki-card" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;"><div style="font-size:4.5rem; font-weight:900; color:var(--accent); letter-spacing:-2px;">천각 아카이브</div><p style="font-size:0.9rem; opacity:0.6; font-weight:700;">UNIFIED MASTER Ver 4.7</p></div></div>
     </div></div>
     <div class="secret-postit" id="postit" style="position: fixed; bottom: 100px; right: 60px; width: 300px; min-height: 300px; background: #fff9c4; color: #5d4037; padding: 30px; display: none; z-index: 2000; box-shadow: 15px 15px 30px rgba(0,0,0,0.1); border-radius: 4px; transform: rotate(-1deg);">
         <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:800; border-bottom:1px solid rgba(0,0,0,0.1); margin-bottom:15px; padding-bottom:8px;"><span>SCRATCHPAD</span><span onclick="toggleSecretMemo()" style="cursor:pointer">X</span></div>
@@ -116,8 +142,8 @@
     </div>
     <div class="page-footer">
         <div class="page-nav" style="display:flex; gap:12px;"><button class="btn-action" onclick="prevPage()">이전</button><button class="btn-action" onclick="nextPage()">다음</button></div>
-        <div id="footer-page-num" style="font-weight:900; font-size:1rem; color:var(--accent); letter-spacing:1px;">PAGE 2</div>
-        <div class="jump-box" style="display:flex; gap:8px; align-items:center;"><input type="number" id="jump-page-input" style="width:50px; padding:8px; border:1px solid var(--border); border-radius:8px; text-align:center; font-weight:800;"><button class="btn-action" onclick="jumpToPage()">Go</button></div>
+        <div id="footer-page-num" style="font-weight:900; font-size:1rem; color:var(--accent); letter-spacing:1px;">PAGE 1</div>
+        <div class="jump-box" style="display:flex; gap:8px; align-items:center;"><input type="number" id="jump-page-input" style="width:40px; padding:8px; border:1px solid var(--border); border-radius:8px; text-align:center; font-weight:800;"><button class="btn-action" onclick="jumpToPage()">Go</button></div>
     </div>
 </main>
 
@@ -218,7 +244,7 @@
 
         if (currentPage === 1) {
             setWideMode(false);
-            container.innerHTML = `<div class="wiki-card" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;"><div style="font-size:4.5rem; font-weight:900; color:var(--accent); letter-spacing:-2px;">천각 아카이브</div><p style="font-size:0.9rem; opacity:0.6; font-weight:700;">UNIFIED MASTER Ver 4.6</p></div>`;
+            container.innerHTML = `<div class="wiki-card" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;"><div style="font-size:4.5rem; font-weight:900; color:var(--accent); letter-spacing:-2px;">천각 아카이브</div><p style="font-size:0.9rem; opacity:0.6; font-weight:700;">UNIFIED MASTER Ver 4.7</p></div>`;
         } else if (currentPage === 2) {
             setWideMode(false);
             let toc = `<div class="wiki-card"><h1>Table of Contents</h1>`;
@@ -226,7 +252,7 @@
                 const items = sorted.filter(d => d.type === idx);
                 if (items.length > 0) {
                     toc += `<div class="side-cat" style="border-bottom:2px solid var(--accent); color:var(--accent); margin-top:25px;">${cat}</div>`;
-                    items.forEach(item => toc += `<div style="display:flex; justify-content:space-between; margin:12px 0 0 20px; cursor:pointer; font-weight:600;" onclick="goToPage(${sorted.indexOf(item)+3})">${item.title}<span style="opacity:0.3;">p.${sorted.indexOf(item)+3}</span></div>`);
+                    items.forEach(item => toc += `<div style="display:flex; justify-content:space-between; margin:10px 0 0 20px; cursor:pointer; font-weight:600;" onclick="goToPage(${sorted.indexOf(item)+3})">${item.title}<span style="opacity:0.3;">p.${sorted.indexOf(item)+3}</span></div>`);
                 }
             });
             container.innerHTML = toc + `</div>`;
@@ -240,18 +266,19 @@
                 setWideMode(false);
                 const dailyTotal = (parseInt(item.munpia) || 0) + (parseInt(item.novelpia) || 0);
                 specificLayout = `<div class="stats-dashboard author-only"><div class="stats-card"><div class="stats-label">2026 Yearly Total</div><div class="stats-val" id="yearly-total-display">${wikiData.filter(d => d.type === 9).reduce((acc, curr) => acc + (parseInt(curr.munpia) || 0) + (parseInt(curr.novelpia) || 0), 0).toLocaleString()}자</div></div><div class="stats-card"><div class="stats-label">Daily Progress</div><div class="stats-val" id="daily-total-display">${dailyTotal.toLocaleString()}자</div></div></div><div class="char-count-info author-only" style="margin-bottom:15px; background:var(--bg); border-radius:12px; padding:15px; display:flex; justify-content:space-around;"><div style="text-align:center;"><div class="info-label">공백 포함</div><div class="stats-val" id="cnt-inc" style="font-size:1.2rem;">${(item.content||"").length.toLocaleString()}자</div></div><div style="text-align:center;"><div class="info-label">공백 제외</div><div class="stats-val" id="cnt-exc" style="font-size:1.2rem;">${(item.content||"").replace(/\s/g, '').length.toLocaleString()}자</div></div></div><div class="writing-grid author-only"><div class="info-box">문피아<br><div class="info-val" contenteditable="true" oninput="liveUpdate(${item.origIdx}, 'munpia', parseInt(this.innerText)||0); updateYearlyStats();">${item.munpia || 0}</div></div><div class="info-box">노벨피아<br><div class="info-val" contenteditable="true" oninput="liveUpdate(${item.origIdx}, 'novelpia', parseInt(this.innerText)||0); updateYearlyStats();">${item.novelpia || 0}</div></div></div><div class="author-only" style="margin:20px 0;"><div style="width:100%; height:12px; background:var(--border); border-radius:6px; overflow:hidden;"><div style="width:${Math.min((dailyTotal/10000)*100, 100)}%; height:100%; background:var(--status-green); transition:0.5s;"></div></div></div><div class="editable-area" id="draft-area" contenteditable="true" oninput="liveUpdate(${item.origIdx}, 'content', this.innerText); document.getElementById('cnt-inc').innerText=this.innerText.length.toLocaleString()+'자'; document.getElementById('cnt-exc').innerText=this.innerText.replace(/\\s/g, '').length.toLocaleString()+'자';">${item.content || '오늘의 마감을 기록하세요...'}</div><div class="author-only" style="display:flex; gap:10px;"><button class="btn-action ${item.mStamp?'active-m':''}" style="flex:1; border-color:var(--munpia-red); color:var(--munpia-red);" onclick="stampToggle(${item.origIdx}, 'm')">M 문피아 마감</button><button class="btn-action ${item.nStamp?'active-n':''}" style="flex:1; border-color:var(--novel-blue); color:var(--novel-blue);" onclick="stampToggle(${item.origIdx}, 'n')">N 노벨피아 마감</button></div>`;
-            } else if (item.type === 2) { // [복구/수정] 몬스터 전용: 생존자의 증언 추가 및 위험도 강조
+            } else if (item.type === 2) { // 몬스터
                 setWideMode(false);
-                specificLayout = `<div class="danger-zone ${isHighDanger?'danger-badge-red':''}" style="background:var(--bg); padding:10px; border-radius:8px; font-weight:900; margin-bottom:15px; cursor:pointer;" onclick="if(!isReader)updateDanger(${item.origIdx})">위험 등급: ${'★'.repeat(item.danger || 1)}${'☆'.repeat(10 - (item.danger || 1))}</div><div class="info-grid"><div class="info-box"><span class="info-label ${isHighDanger?'high-danger-text':''}">발견 생태 / 배경</span><div class="info-val ${isHighDanger?'high-danger-text':''}" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'habitat', this.innerText)">${item.habitat || ''}</div></div><div class="info-box"><span class="info-label ${isHighDanger?'high-danger-text':''}">약점 / 고유 특징</span><div class="info-val ${isHighDanger?'high-danger-text':''}" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'weakness', this.innerText)">${item.weakness || ''}</div></div></div><div class="analysis-box" style="margin-bottom:20px; background:#fff5f5; border-color:#feb2b2;"><span class="info-label" style="color:var(--monster-red)">생존자의 증언 (Survivor Testimony)</span><div contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'testimony', this.innerText)" style="outline:none; font-style:italic; line-height:1.6; margin-top:10px; color:#555;">${item.testimony || '증언을 기록하세요...'}</div></div><div class="editable-area ${isHighDanger?'high-danger-text':''}" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'content', this.innerText)">${item.content || '몬스터 상세 정보를 입력하세요.'}</div>`;
+                specificLayout = `<div class="danger-zone ${isHighDanger?'danger-badge-red':''}" style="background:var(--bg); padding:10px; border-radius:8px; font-weight:900; margin-bottom:15px; cursor:pointer;" onclick="if(!isReader)updateDanger(${item.origIdx})">위험 등급: ${'★'.repeat(item.danger || 1)}${'☆'.repeat(10 - (item.danger || 1))}</div><div class="info-grid"><div class="info-box"><span class="info-label ${isHighDanger?'high-danger-text':''}">발견 생태 / 배경</span><div class="info-val ${isHighDanger?'high-danger-text':''}" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'habitat', this.innerText)">${item.habitat || ''}</div></div><div class="info-box"><span class="info-label ${isHighDanger?'high-danger-text':''}">약점 / 고유 특징</span><div class="info-val ${isHighDanger?'high-danger-text':''}" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'weakness', this.innerText)">${item.weakness || ''}</div></div></div><div class="analysis-box" style="margin-bottom:20px; background:#fff5f5; border-color:#feb2b2;"><span class="info-label" style="color:var(--monster-red)">생존자의 증언 (Survivor Testimony)</span><div contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'testimony', this.innerText)" style="outline:none; font-style:italic; line-height:1.6; margin-top:10px; color:#555;">${item.testimony || '증언을 기록하세요...'}</div></div><div class="editable-area ${isHighDanger?'high-danger-text':''}" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'content', this.innerText)">${item.content || '몬스터 상세 정보'}</div>`;
             } else if (item.type === 0) { // 세계관
                 specificLayout = `<div class="zoom-controls author-only"><button class="btn-zoom" onclick="setWideMode(true)">↔ 넓게</button></div><div class="diff-badge ${item.accessibility==='상'?'diff-high':item.accessibility==='중'?'diff-mid':'diff-low'}" onclick="if(!isReader)toggleDiff(${item.origIdx})">판별: ${diffLabels[item.accessibility||'하']}</div><div class="analysis-box author-only"><span class="info-label">Standard Worldview Analysis</span><div contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'analysis', this.innerText)" style="outline:none; font-size:1rem; line-height:1.8; margin-top:10px; white-space: pre-wrap;">${item.analysis || analysisTemplate}</div></div><div class="editable-area" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'content', this.innerText)">${item.content || '세계관 한줄 요약 (로그라인)'}</div>`;
             } else if (item.type === 4) { // 가계도
                 specificLayout = `<div class="zoom-controls author-only"><button class="btn-zoom" onclick="setWideMode(true)">↔ 넓게</button></div><div class="hierarchy-container"><div class="hier-group">${(item.habitat || "").split(',').filter(x => x).map((name, i) => `<div class="hier-box"><div class="hier-node" contenteditable="${editable}" oninput="let a='${item.habitat}'.split(','); a[${i}]=this.innerText; liveUpdate(${item.origIdx}, 'habitat', a.join(','))" onclick="jumpToChar(this.innerText)">${name}</div><button class="btn-node-del author-only" onclick="deleteHierNode(${item.origIdx}, 'habitat', ${i})">x</button></div>`).join('')}<button class="btn-node-add author-only" onclick="addHierNode(${item.origIdx}, 'habitat')">+</button></div><div class="rel-line"></div><div class="hier-group">${(item.weakness || "").split(',').filter(x => x).map((name, i) => `<div class="hier-box"><div class="rel-line ${(item.relColors||"").split(',')[i]||'default'}"></div><div class="hier-sub-node" contenteditable="${editable}" oninput="let a='${item.weakness}'.split(','); a[${i}]=this.innerText; liveUpdate(${item.origIdx}, 'weakness', a.join(','))" onclick="jumpToChar(this.innerText)">${name}</div><div class="rel-picker author-only"><div class="color-dot" style="background:var(--rel-red)" onclick="setRelColor(${item.origIdx}, ${i}, 'red')"></div><div class="color-dot" style="background:var(--rel-blue)" onclick="setRelColor(${item.origIdx}, ${i}, 'blue')"></div><div class="color-dot" style="background:var(--rel-pink)" onclick="setRelColor(${item.origIdx}, ${i}, 'pink')"></div><div class="color-dot" style="background:var(--rel-black)" onclick="setRelColor(${item.origIdx}, ${i}, 'black')"></div></div><button class="btn-node-del author-only" onclick="deleteHierNode(${item.origIdx}, 'weakness', ${i})">x</button></div>`).join('')}<button class="btn-node-add author-only" onclick="addHierNode(${item.origIdx}, 'weakness')">+</button></div></div><div class="editable-area" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'content', this.innerText)">${item.content || '관계를 기록하세요.'}</div>`;
             } else if (item.type === 7 || item.type === 8) { // 연대기
-                specificLayout = `<div class="zoom-controls author-only"><button class="btn-zoom" onclick="setWideMode(true)">↔ 넓게</button></div><span class="info-label">출연 캐릭터</span><div class="chronicle-cast">${(item.habitat || "").split(',').filter(x => x).map((name, i) => `<div class="cast-node" onclick="jumpToChar(this.innerText)">${name}<button class="author-only" style="background:none; border:none; color:red; cursor:pointer;" onclick="event.stopPropagation(); deleteCastNode(${item.origIdx}, ${i})">x</button></div>`).join('')}<button class="btn-add-item author-only" onclick="addCastNode(${item.origIdx})">+</button></div><div class="editable-area" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'content', this.innerText)">${item.content || '사건 흐름을 기록하세요.'}</div>`;
+                specificLayout = `<div class="zoom-controls author-only"><button class="btn-zoom" onclick="setWideMode(true)">↔ 넓게</button></div><span class="info-label">출연 캐릭터</span><div class="chronicle-cast">${(item.habitat || "").split(',').filter(x => x).map((name, i) => `<div class="cast-node" onclick="jumpToChar(this.innerText)">${name}<button class="author-only" style="background:none; border:none; color:red; cursor:pointer;" onclick="event.stopPropagation(); deleteCastNode(${item.origIdx}, ${i})">x</button></div>`).join('')}<button class="btn-add-item author-only" onclick="addCastNode(${item.origIdx})">+</button></div><div class="editable-area" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'content', this.innerText)">${item.content || '사건 흐름'}</div>`;
             } else if (item.type === 6) { // 복선
-                specificLayout = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;"><div><span class="info-label">중요도</span><br><span style="color:var(--gold); font-size:1.8rem; cursor:pointer;" onclick="if(!isReader)updateForeshadowStars(${item.origIdx})">${'★'.repeat(item.danger || 1)}${'☆'.repeat(5 - (item.danger || 1))}</span></div><button style="padding:10px 25px; border-radius:30px; border:none; font-weight:800; cursor:pointer; color:#fff; background:${item.solved?'var(--status-green)':'var(--munpia-red)'}" onclick="if(!isReader)toggleForeshadowSolved(${item.origIdx})">${item.solved ? '✓ 회수 완료' : '⚠ 미회수'}</button></div><div class="info-grid"><div class="info-box"><span class="info-label">투척 화수</span><div class="info-val" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'habitat', this.innerText)">${item.habitat || '0'}</div></div><div class="info-box"><span class="info-label">회수 예정 화수</span><div class="info-val" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'weakness', this.innerText)">${item.weakness || '0'}</div></div></div><div class="editable-area" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'content', this.innerText)">${item.content || ''}</div>`;
-            } else { // 기타 (캐릭터 포함)
+                const stars = (item.danger > 5) ? 5 : item.danger;
+                specificLayout = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;"><div><span class="info-label">중요도</span><br><span style="color:var(--gold); font-size:1.8rem; cursor:pointer;" onclick="if(!isReader)updateForeshadowStars(${item.origIdx})">${'★'.repeat(stars || 1)}${'☆'.repeat(5 - (stars || 1))}</span></div><button style="padding:10px 25px; border-radius:30px; border:none; font-weight:800; cursor:pointer; color:#fff; background:${item.solved?'var(--status-green)':'var(--munpia-red)'}" onclick="if(!isReader)toggleForeshadowSolved(${item.origIdx})">${item.solved ? '✓ 회수 완료' : '⚠ 미회수'}</button></div><div class="info-grid"><div class="info-box"><span class="info-label">투척 화수</span><div class="info-val" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'habitat', this.innerText)">${item.habitat || '0'}</div></div><div class="info-box"><span class="info-label">회수 예정 화수</span><div class="info-val" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'weakness', this.innerText)">${item.weakness || '0'}</div></div></div><div class="editable-area" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'content', this.innerText)">${item.content || ''}</div>`;
+            } else { // 기타 (캐릭터)
                 specificLayout = `${(item.type === 1) ? `<div class="info-grid"><div class="info-box"><span class="info-label">생태 / 배경</span><div class="info-val" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'habitat', this.innerText)">${item.habitat || ''}</div></div><div class="info-box"><span class="info-label">약점 / 특징</span><div class="info-val" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'weakness', this.innerText)">${item.weakness || ''}</div></div></div>` : ''}<div class="editable-area ${isHighDanger?'high-danger-text':''}" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'content', this.innerText)">${item.content || ''}</div>`;
             }
 
@@ -262,12 +289,12 @@
 
     function addNewNovel() { let n = prompt("새 소설 제목:"); if (!n) return; const s = [ {t:0, n:"세계관 개요"}, {t:1, n:"주요 등장인물"}, {t:4, n:"인물 관계도"}, {t:6, n:"복선 체크리스트"}, {t:7, n:"메인 에피소드"}, {t:8, n:"병렬 연대기"}, {t:9, n:"데일리 연재로그"} ]; s.forEach(x => wikiData.push({ novel: n, type: x.t, title: x.n, content: "", danger: 1, habitat: "", weakness: "", testimony: "", authorMemo: "", munpia: 0, novelpia: 0, mStamp: false, nStamp: false, solved: false, relColors: "", accessibility: "하", analysis: (x.t === 0 ? analysisTemplate : "") })); saveAndRender(); }
     function addItemToCategory(type) { if (currentNovelFilter === "all" && type !== 2) { alert("소설을 먼저 선택하세요."); return; } const title = prompt(categories[type] + " 제목:", "새 항목"); if (!title) return; wikiData.push({ novel: (type === 2 ? "Global" : currentNovelFilter), type: type, title: title, content: "", danger: 1, habitat: "", weakness: "", testimony: "", authorMemo: "", munpia: 0, novelpia: 0, mStamp: false, nStamp: false, solved: false, relColors: "", accessibility: "하", analysis: (type === 0 ? analysisTemplate : "") }); saveAndRender(); }
+    function liveUpdate(idx, field, val) { wikiData[idx][field] = val; localStorage.setItem('chunGakData_v9', JSON.stringify(wikiData)); }
+    function saveAndRender() { localStorage.setItem('chunGakData_v9', JSON.stringify(wikiData)); renderPage(); }
     function stampToggle(idx, type) { if(type==='m') wikiData[idx].mStamp=!wikiData[idx].mStamp; else wikiData[idx].nStamp=!wikiData[idx].nStamp; saveAndRender(); }
     function updateDanger(idx) { const val = prompt("위험도 (1-10)", wikiData[idx].danger || 1); const num = parseInt(val); if(!isNaN(num)) { wikiData[idx].danger = num; saveAndRender(); } }
     function updateForeshadowStars(idx) { const val = prompt("중요도 (1-5)", wikiData[idx].danger || 1); const num = parseInt(val); if(!isNaN(num)) { wikiData[idx].danger = num; saveAndRender(); } }
     function toggleForeshadowSolved(idx) { wikiData[idx].solved = !wikiData[idx].solved; saveAndRender(); }
-    function liveUpdate(idx, field, val) { wikiData[idx][field] = val; localStorage.setItem('chunGakData_v9', JSON.stringify(wikiData)); }
-    function saveAndRender() { localStorage.setItem('chunGakData_v9', JSON.stringify(wikiData)); renderPage(); }
     function goToPage(n) { if (n >= 1 && n <= totalPages) { currentPage = n; renderPage(); } }
     function prevPage() { goToPage(currentPage - 1); }
     function nextPage() { goToPage(currentPage + 1); }
@@ -275,7 +302,7 @@
     function deleteItem(idx) { if(confirm("삭제할까요?")) { wikiData.splice(idx, 1); saveAndRender(); currentPage = 2; renderPage(); } }
     function deleteEntireNovel() { if (currentNovelFilter === "all") return; if (confirm("소설 전체를 삭제할까요?")) { wikiData = wikiData.filter(d => d.novel !== currentNovelFilter); saveAndRender(); currentNovelFilter = "all"; currentPage = 2; renderPage(); } }
     function changeNovel(v) { currentNovelFilter = v; document.documentElement.style.setProperty('--accent', novelThemes[v]||'#1d1d1f'); currentPage = 2; renderPage(); }
-    function exportData() { localStorage.setItem('chunGakLastBackup', new Date().toISOString()); const d = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(wikiData)); const a = document.createElement('a'); a.setAttribute("href", d); a.setAttribute("download", "아카이브_백업.json"); a.click(); }
+    function exportData() { localStorage.setItem('chunGakLastBackup', new Date().toISOString()); const d = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(wikiData)); const a = document.createElement('a'); a.setAttribute("href", d); a.setAttribute("download", "천각_아카이브_백업.json"); a.click(); }
     function copyFullCode() { let h = document.documentElement.outerHTML.replace(/let wikiData = \[[\s\S]*?\];/, `let wikiData = ${JSON.stringify(wikiData)};`); navigator.clipboard.writeText(h).then(() => alert("전체 소스 복사!")); }
     function copyReaderLink() { navigator.clipboard.writeText("https://sasayus.github.io/library/?mode=read").then(() => alert("독자 링크 복사!")); }
     function addCastNode(origIdx) { let arr = (wikiData[origIdx].habitat || "").split(',').filter(x => x); arr.push('캐릭터 이름'); wikiData[origIdx].habitat = arr.join(','); saveAndRender(); }
