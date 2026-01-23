@@ -1,6 +1,6 @@
 <html lang="ko"><head>
     <meta charset="UTF-8">
-    <title>작가 천각(天刻) 아카이브 Ver 3.4</title>
+    <title>작가 천각(天刻) 아카이브 Ver 3.6</title>
     <style>
         :root { 
             --bg: #f5f5f7; --card: #ffffff; --sidebar: #ffffff;
@@ -21,46 +21,46 @@
         }
         body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); display: flex; margin: 0; height: 100vh; overflow: hidden; transition: 0.3s; }
         
-        /* 사이드바 디자인 개선 */
+        /* [수정] 독자 모드에서 소설 관리 버튼만 숨기고 하단 메뉴는 유지 */
+        body.reader-mode .nav-btns,
+        body.reader-mode .btn-add-item,
+        body.reader-mode .zoom-controls,
+        body.reader-mode .rel-picker,
+        body.reader-mode .btn-node-del,
+        body.reader-mode .btn-node-add,
+        body.reader-mode .btn-cast-del,
+        body.reader-mode .author-only { display: none !important; }
+
+        /* 사이드바 */
         nav { width: 300px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 25px 20px; overflow-y: auto; display: flex; flex-direction: column; transition: 0.3s; position: relative; z-index: 100; box-shadow: 2px 0 10px rgba(0,0,0,0.02); }
         nav.collapsed { margin-left: -300px; }
         .toggle-btn { position: fixed; left: 15px; top: 15px; z-index: 1000; background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); transition: 0.2s; font-size: 1.2rem; }
-        .toggle-btn:hover { transform: var(--btn-hover); }
-
-        nav h2 { color: var(--text); font-size: 1.1rem; border-bottom: 2px solid var(--text); padding-bottom: 15px; margin-bottom: 20px; text-align: center; font-weight: 800; margin-top: 40px; cursor: pointer; letter-spacing: -0.5px; }
+        
+        nav h2 { color: var(--text); font-size: 1.1rem; border-bottom: 2px solid var(--text); padding-bottom: 15px; margin-bottom: 20px; text-align: center; font-weight: 800; margin-top: 40px; cursor: pointer; }
         .novel-selector { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 15px; font-weight: 700; background: var(--card); color: var(--text); border-left: 5px solid var(--accent); box-shadow: var(--shadow); appearance: none; cursor: pointer; }
         
         .preset-group { display: flex; gap: 8px; margin-bottom: 25px; justify-content: center; }
         .btn-preset { width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .btn-preset:hover { transform: scale(1.2); border-color: var(--border); }
 
         #sidebar-menu { flex: 1; overflow-y: auto; margin-bottom: 20px; }
-        .side-cat { font-size: 0.75rem; color: var(--accent); font-weight: 800; margin-top: 18px; margin-bottom: 8px; text-transform: uppercase; border-bottom: 1px solid var(--border); padding: 8px 0; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.5px; }
+        .side-cat { font-size: 0.75rem; color: var(--accent); font-weight: 800; margin-top: 18px; margin-bottom: 8px; text-transform: uppercase; border-bottom: 1px solid var(--border); padding: 8px 0; display: flex; justify-content: space-between; align-items: center; }
         .cat-title-box { cursor: pointer; flex: 1; }
         .cat-title-box::after { content: ' ▾'; opacity: 0.5; }
         .cat-title-box.collapsed::after { content: ' ▸'; }
         
-        /* 메뉴 내 추가 버튼 디자인 개선 */
-        .btn-add-item { width: 22px; height: 22px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; color: var(--accent); font-weight: 900; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .btn-add-item:hover { background: var(--accent); color: white; transform: scale(1.1); }
+        .btn-add-item { width: 22px; height: 22px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; color: var(--accent); font-weight: 900; transition: 0.2s; }
         
         .cat-items { overflow: hidden; margin-top: 5px; }
         .cat-items.hidden { display: none; }
         .side-item { font-size: 0.85rem; padding: 10px 14px; cursor: pointer; border-radius: 8px; color: var(--text); margin-bottom: 4px; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: 0.2s; }
-        .side-item:hover { background: var(--bg); opacity: 1; padding-left: 18px; }
         .side-item.active { background: var(--accent); color: #fff; font-weight: 700; opacity: 1; box-shadow: var(--shadow); }
         
-        /* 액션 버튼 디자인 개선 */
+        /* 소설 관리 버튼 영역 */
         .nav-btns { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--border); padding-top: 20px; }
         .btn-action { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 12px; cursor: pointer; border-radius: 12px; font-size: 0.85rem; font-weight: 700; transition: 0.3s; box-shadow: var(--shadow); text-align: center; }
         .btn-action:hover { transform: var(--btn-hover); background: var(--bg); }
-        
-        /* 새 소설 추가 버튼 (Special) */
         .btn-main-action { background: var(--accent); color: white; border: none; }
-        .btn-main-action:hover { background: #333; box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
-        
         .btn-danger { color: #d32f2f; border-color: #fecaca; }
-        .btn-danger:hover { background: #fee2e2; border-color: #d32f2f; }
 
         main { flex: 1; display: flex; flex-direction: column; background: var(--bg); position: relative; overflow: hidden; }
         #page-container { flex: 1; overflow-y: auto; padding: 50px; display: flex; justify-content: center; }
@@ -68,20 +68,13 @@
         #content.wide { max-width: 95%; }
 
         .wiki-card { background: var(--card); padding: 60px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.04); min-height: 700px; position: relative; border-top: 8px solid var(--accent); transition: 0.3s; }
-        .high-danger-card { border-top-color: var(--monster-red) !important; box-shadow: 0 15px 50px rgba(215, 0, 21, 0.1) !important; }
+        .high-danger-card { border-top-color: var(--monster-red) !important; }
         .high-danger-text { color: var(--monster-red) !important; }
 
-        /* 글상자 스타일 개선 */
-        .editable-area { line-height: 2.1; font-size: 1.15rem; outline: none; min-height: 350px; white-space: pre-wrap; background: rgba(0,0,0,0.015); border: 1px solid var(--border); border-radius: 14px; padding: 35px; transition: 0.3s; box-shadow: inset 0 2px 10px rgba(0,0,0,0.01); }
-        .editable-area:focus { background: var(--card); border-color: var(--accent); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .editable-area { line-height: 2.1; font-size: 1.15rem; outline: none; min-height: 350px; white-space: pre-wrap; background: rgba(0,0,0,0.015); border: 1px solid var(--border); border-radius: 14px; padding: 35px; transition: 0.3s; }
+        .editable-area:focus { background: var(--card); border-color: var(--accent); }
 
-        /* 캐릭터 캐스트 & 관계도 디자인 */
-        .chronicle-cast { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; padding: 20px; background: var(--bg); border-radius: 12px; border: 1px dashed var(--border); }
-        .cast-node { border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; background: var(--card); font-size: 0.9rem; font-weight: 800; cursor: pointer; position: relative; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
-        .cast-node:hover { transform: var(--btn-hover); border-color: var(--accent); }
-        .btn-cast-del { position: absolute; top: -6px; right: -6px; background: var(--rel-red); color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: none; }
-        .cast-node:hover .btn-cast-del { display: block; }
-
+        /* 가계도 및 연대기 */
         .hierarchy-container { display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 40px 0; width: 100%; }
         .hier-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; width: 100%; }
         .hier-box { position: relative; display: flex; flex-direction: column; align-items: center; }
@@ -92,28 +85,33 @@
         .rel-line.blue { background: var(--rel-blue); }
         .rel-line.pink { background: var(--rel-pink); }
         .rel-line.black { background: var(--rel-black); }
+        .rel-picker { display: flex; gap: 4px; margin-top: 5px; }
+        .color-dot { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); }
+        .btn-node-del { position: absolute; top: -8px; right: -8px; background: #ff3b30; color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: none; }
+        .hier-box:hover .btn-node-del { display: block; }
+        .btn-node-add { background: var(--bg); border: 2px dashed var(--border); color: var(--sub-text); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 800; margin: 10px; }
 
         .stats-dashboard { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px; }
-        .stats-card { background: #f8f9fa; padding: 20px; border-radius: 14px; border-left: 6px solid var(--accent); text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        .stats-card { background: #f8f9fa; padding: 20px; border-radius: 14px; border-left: 6px solid var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
         .stats-val { font-size: 1.6rem; font-weight: 900; color: var(--accent); }
-        .stats-label { font-size: 0.8rem; color: var(--sub-text); font-weight: 800; text-transform: uppercase; }
 
         .secret-bookmark { width: 35px; height: 70px; position: absolute; top: 40px; right: -18px; background: var(--accent); border-radius: 0 6px 6px 0; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 100; box-shadow: 4px 4px 15px rgba(0,0,0,0.1); transition: 0.3s; }
-        .secret-bookmark:hover { right: -25px; width: 45px; }
         .secret-bookmark::after { content: '✎'; color: white; font-size: 1.2rem; }
 
+        /* 하단 내비게이션 바 (독자 모드에서도 유지) */
         .page-footer { height: 70px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 50px; background: var(--card); }
         .zoom-controls { position: absolute; top: 20px; right: 60px; display: flex; gap: 8px; z-index: 50; }
-        .btn-zoom { padding: 6px 14px; font-size: 0.7rem; font-weight: 800; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); cursor: pointer; transition: 0.2s; }
-        .btn-zoom:hover { background: var(--accent); color: white; }
+        .btn-zoom { padding: 6px 14px; font-size: 0.7rem; font-weight: 800; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); cursor: pointer; }
+        .analysis-report { background: #fffde7; border: 1px solid #fbc02d; padding: 20px; border-radius: 12px; margin: 20px 0; display: none; line-height: 1.6; }
+        .solved-card { opacity: 0.6; filter: grayscale(50%); }
     </style>
 </head>
 <body>
 <button class="toggle-btn" onclick="toggleSidebar()">≡</button>
 <nav id="sidebar">
-    <h2 onclick="location.reload()">천각(天刻) 아카이브 Ver 3.4</h2>
-    <button class="btn-action" onclick="toggleDarkMode()" style="margin-bottom:15px;">🌙 다크 모드 전환</button>
-    <div class="preset-group">
+    <h2 onclick="location.reload()">천각(天刻) 아카이브 Ver 3.6</h2>
+    <button class="btn-action author-only" onclick="toggleDarkMode()" style="margin-bottom:15px;">🌙 다크 모드 전환</button>
+    <div class="preset-group author-only">
         <div class="btn-preset" style="background:#1d1d1f;" onclick="updateThemeColor('#1d1d1f')"></div>
         <div class="btn-preset" style="background:#1a237e;" onclick="updateThemeColor('#1a237e')"></div>
         <div class="btn-preset" style="background:#b71c1c;" onclick="updateThemeColor('#b71c1c')"></div>
@@ -121,7 +119,7 @@
         <div class="btn-preset" style="background:#bf9000;" onclick="updateThemeColor('#bf9000')"></div>
     </div>
     <select id="novel-filter" class="novel-selector" onchange="changeNovel(this.value)"><option value="all">전체 프로젝트 보기</option><option value="기존 소설">기존 소설</option><option value="살기 뱀파">살기 뱀파</option></select>
-    <div id="sidebar-menu"><div class="side-cat"><div class="cat-title-box">0. 세계관</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">새 항목</div><div class="side-item">세계관 개요</div></div><div class="side-cat"><div class="cat-title-box">1. 캐릭터</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">로인 카밀루스&nbsp;</div><div class="side-item">로인 카밀루스&nbsp;</div></div><div class="side-cat"><div class="cat-title-box">2. 몬스터(공통)</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">스켈레톤</div></div><div class="side-cat"><div class="cat-title-box">3. 짜투리</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">새로운 이야기</div></div><div class="side-cat"><div class="cat-title-box">4. 관계도(가계도)</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">인물 관계도</div><div class="side-item">인물 관계도</div></div><div class="side-cat"><div class="cat-title-box">5. 연대기</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">ㅁ</div></div><div class="side-cat"><div class="cat-title-box">6. 복선 현황</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">복선 체크리스트</div><div class="side-item">복선 체크리스트</div></div><div class="side-cat"><div class="cat-title-box collapsed">7. 에피소드 보드</div><button class="btn-add-item author-only">+</button></div><div class="cat-items hidden"><div class="side-item">ㅁ</div></div><div class="side-cat"><div class="cat-title-box collapsed">8. 멀티 연대기</div><button class="btn-add-item author-only">+</button></div><div class="cat-items hidden"><div class="side-item">ㅁ</div></div><div class="side-cat"><div class="cat-title-box collapsed">9. 연재 현황</div><button class="btn-add-item author-only">+</button></div><div class="cat-items hidden"><div class="side-item">데일리 연재로그</div><div class="side-item">데일리 연재로그</div></div></div>
+    <div id="sidebar-menu"><div class="side-cat"><div class="cat-title-box">0. 세계관</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">새 항목</div><div class="side-item">세계관 개요</div></div><div class="side-cat"><div class="cat-title-box">1. 캐릭터</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">로인 카밀루스&nbsp;</div><div class="side-item">로인 카밀루스&nbsp;</div></div><div class="side-cat"><div class="cat-title-box">2. 몬스터(공통)</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">스켈레톤</div></div><div class="side-cat"><div class="cat-title-box">3. 짜투리</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">새로운 이야기</div></div><div class="side-cat"><div class="cat-title-box">4. 관계도(가계도)</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">인물 관계도</div><div class="side-item">인물 관계도</div></div><div class="side-cat"><div class="cat-title-box">5. 연대기</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">ㅁ</div></div><div class="side-cat"><div class="cat-title-box">6. 복선 현황</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">복선 체크리스트</div><div class="side-item">복선 체크리스트</div></div><div class="side-cat"><div class="cat-title-box">7. 에피소드 보드</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">ㅁ</div></div><div class="side-cat"><div class="cat-title-box">8. 멀티 연대기</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">ㅁ</div></div><div class="side-cat"><div class="cat-title-box">9. 연재 현황</div><button class="btn-add-item author-only">+</button></div><div class="cat-items"><div class="side-item">데일리 연재로그</div><div class="side-item">데일리 연재로그</div></div></div>
     <div class="nav-btns">
         <button class="btn-action btn-main-action" onclick="addNewNovel()">✚ 새 소설 추가 (Set-up)</button>
         <button class="btn-action" onclick="copyFullCode()">전체 소스 복사</button>
@@ -133,7 +131,7 @@
 <main>
     <div id="page-container"><div id="content">
         <div class="secret-bookmark author-only" onclick="toggleSecretMemo()"></div>
-        <div id="main-card-slot"><div class="wiki-card" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;"><div style="font-size:4.5rem; font-weight:900; color:var(--accent); letter-spacing:-2px;">天 刻</div><p style="font-size:0.9rem; opacity:0.6; font-weight:700;">ARCHIVE MASTER Ver 3.4</p></div></div>
+        <div id="main-card-slot"><div class="wiki-card" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;"><div style="font-size:4.5rem; font-weight:900; color:var(--accent); letter-spacing:-2px;">天 刻</div><p style="font-size:0.9rem; opacity:0.6; font-weight:700;">READER SAFE Ver 3.6</p></div></div>
     </div></div>
     <div class="secret-postit" id="postit" style="position: fixed; bottom: 100px; right: 60px; width: 300px; min-height: 300px; background: #fff9c4; color: #5d4037; padding: 30px; display: none; z-index: 2000; box-shadow: 15px 15px 30px rgba(0,0,0,0.1); border-radius: 4px; transform: rotate(-1deg);">
         <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:800; border-bottom:1px solid rgba(0,0,0,0.1); margin-bottom:15px; padding-bottom:8px;"><span>SCRATCHPAD</span><span onclick="toggleSecretMemo()" style="cursor:pointer">CLOSE [X]</span></div>
@@ -153,6 +151,9 @@
     let collapsedCats = {};
     let darkMode = false;
 
+    const isReader = new URLSearchParams(window.location.search).get('mode') === 'read';
+    if (isReader) document.body.classList.add('reader-mode');
+
     const saved = localStorage.getItem('chunGakData_v9');
     const savedThemes = localStorage.getItem('chunGakThemes_v9');
     const savedMemo = localStorage.getItem('chunGakSecretMemo');
@@ -166,9 +167,6 @@
     function saveSecretMemo(txt) { localStorage.setItem('chunGakSecretMemo', txt); }
     function setWideMode(isWide) { const content = document.getElementById('content'); isWide ? content.classList.add('wide') : content.classList.remove('wide'); }
     function updateThemeColor(color) { novelThemes[currentNovelFilter] = color; localStorage.setItem('chunGakThemes_v9', JSON.stringify(novelThemes)); document.documentElement.style.setProperty('--accent', color); renderSidebar(); renderPage(); }
-
-    const isReader = new URLSearchParams(window.location.search).get('mode') === 'read';
-    if (isReader) document.body.classList.add('reader-mode');
 
     let currentNovelFilter = "all";
     let currentPage = 1;
@@ -188,7 +186,7 @@
             const sorted = getSortedData();
             const pageIndex = sorted.findIndex(d => d.origIdx === wikiData.indexOf(target));
             if (pageIndex !== -1) goToPage(pageIndex + 3);
-        } else { alert("캐릭터 도감에 '" + charName + "'이(가) 없습니다."); }
+        } else { if(!isReader) alert("캐릭터 도감에 '" + charName + "'이(가) 없습니다."); }
     }
 
     function analyzeAndCount() {
@@ -206,33 +204,11 @@
         saveAndRender();
     }
 
-    function addCastNode(origIdx) {
-        let arr = (wikiData[origIdx].habitat || "").split(',').filter(x => x);
-        arr.push('등장 캐릭터'); wikiData[origIdx].habitat = arr.join(','); saveAndRender();
-    }
-    function deleteCastNode(origIdx, nodeIdx) {
-        let arr = wikiData[origIdx].habitat.split(','); arr.splice(nodeIdx, 1);
-        wikiData[origIdx].habitat = arr.join(','); saveAndRender();
-    }
-
-    function addHierNode(origIdx, field) {
-        let arr = (wikiData[origIdx][field] || "").split(',').filter(x => x);
-        arr.push(field === 'habitat' ? '상위 인물' : '하위 인물');
-        wikiData[origIdx][field] = arr.join(',');
-        if (field === 'weakness') { let colors = (wikiData[origIdx].relColors || "").split(','); colors.push('default'); wikiData[origIdx].relColors = colors.join(','); }
-        saveAndRender();
-    }
-    function deleteHierNode(origIdx, field, nodeIdx) {
-        let arr = wikiData[origIdx][field].split(','); arr.splice(nodeIdx, 1); wikiData[origIdx][field] = arr.join(',');
-        if (field === 'weakness') { let colors = (wikiData[origIdx].relColors || "").split(','); colors.splice(nodeIdx, 1); wikiData[origIdx].relColors = colors.join(','); }
-        saveAndRender();
-    }
-    function setRelColor(origIdx, nodeIdx, color) {
-        let colors = (wikiData[origIdx].relColors || "").split(',');
-        while(colors.length <= nodeIdx) colors.push('default');
-        colors[nodeIdx] = color; wikiData[origIdx].relColors = colors.join(',');
-        saveAndRender();
-    }
+    function addCastNode(origIdx) { let arr = (wikiData[origIdx].habitat || "").split(',').filter(x => x); arr.push('등장 캐릭터'); wikiData[origIdx].habitat = arr.join(','); saveAndRender(); }
+    function deleteCastNode(origIdx, nodeIdx) { let arr = wikiData[origIdx].habitat.split(','); arr.splice(nodeIdx, 1); wikiData[origIdx].habitat = arr.join(','); saveAndRender(); }
+    function addHierNode(origIdx, field) { let arr = (wikiData[origIdx][field] || "").split(',').filter(x => x); arr.push(field === 'habitat' ? '상위 인물' : '하위 인물'); wikiData[origIdx][field] = arr.join(','); if (field === 'weakness') { let colors = (wikiData[origIdx].relColors || "").split(','); colors.push('default'); wikiData[origIdx].relColors = colors.join(','); } saveAndRender(); }
+    function deleteHierNode(origIdx, field, nodeIdx) { let arr = wikiData[origIdx][field].split(','); arr.splice(nodeIdx, 1); wikiData[origIdx][field] = arr.join(','); if (field === 'weakness') { let colors = (wikiData[origIdx].relColors || "").split(','); colors.splice(nodeIdx, 1); wikiData[origIdx].relColors = colors.join(','); } saveAndRender(); }
+    function setRelColor(origIdx, nodeIdx, color) { let colors = (wikiData[origIdx].relColors || "").split(','); while(colors.length <= nodeIdx) colors.push('default'); colors[nodeIdx] = color; wikiData[origIdx].relColors = colors.join(','); saveAndRender(); }
 
     function updateYearlyStats() {
         const yearTotal = wikiData.filter(d => d.type === 9).reduce((acc, curr) => acc + (parseInt(curr.munpia) || 0) + (parseInt(curr.novelpia) || 0), 0);
@@ -285,7 +261,7 @@
 
         if (currentPage === 1) {
             setWideMode(false);
-            container.innerHTML = `<div class="wiki-card" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;"><div style="font-size:4.5rem; font-weight:900; color:var(--accent); letter-spacing:-2px;">天 刻</div><p style="font-size:0.9rem; opacity:0.6; font-weight:700;">ARCHIVE MASTER Ver 3.4</p></div>`;
+            container.innerHTML = `<div class="wiki-card" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;"><div style="font-size:4.5rem; font-weight:900; color:var(--accent); letter-spacing:-2px;">天 刻</div><p style="font-size:0.9rem; opacity:0.6; font-weight:700;">READER SAFE Ver 3.6</p></div>`;
         } else if (currentPage === 2) {
             setWideMode(false);
             let toc = `<div class="wiki-card"><h1>Table of Contents</h1>`;
@@ -293,7 +269,7 @@
                 const items = sorted.filter(d => d.type === idx);
                 if (items.length > 0) {
                     toc += `<div class="side-cat" style="border-bottom:2px solid var(--accent); color:var(--accent); margin-top:25px;">${cat}</div>`;
-                    items.forEach(item => toc += `<div style="display:flex; justify-content:space-between; margin:12px 0 0 20px; cursor:pointer; font-weight:600;" onclick="goToPage(${sorted.indexOf(item)+3})">${item.title}<span style="opacity:0.3;">p.${sorted.indexOf(item)+3}</span></div>`);
+                    items.forEach(item => toc += `<div style="display:flex; justify-content:space-between; margin:10px 0 0 20px; cursor:pointer; font-weight:600;" onclick="goToPage(${sorted.indexOf(item)+3})">${item.title}<span style="opacity:0.3;">p.${sorted.indexOf(item)+3}</span></div>`);
                 }
             });
             container.innerHTML = toc + `</div>`;
@@ -313,12 +289,10 @@
             } else if (item.type === 7 || item.type === 8) { // 연대기
                 specificLayout = `<div class="zoom-controls author-only"><button class="btn-zoom" onclick="setWideMode(true)">↔ 넓게</button><button class="btn-zoom" onclick="setWideMode(false)">→← 좁게</button></div><span class="info-label">출연 캐릭터 (이름 클릭 시 도감 점프)</span><div class="chronicle-cast">${(item.habitat || "").split(',').filter(x => x).map((name, i) => `<div class="cast-node" onclick="jumpToChar(this.innerText)">${name}<button class="btn-cast-del author-only" onclick="event.stopPropagation(); deleteCastNode(${item.origIdx}, ${i})">x</button></div>`).join('')}<button class="btn-add-item author-only" onclick="addCastNode(${item.origIdx})">+</button></div><div class="editable-area" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'content', this.innerText)">${item.content || '사건의 흐름을 기록하세요.'}</div>`;
             } else if (item.type === 6) { // 복선
-                setWideMode(false);
                 const stars = (item.danger > 5) ? 5 : item.danger;
-                specificLayout = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;"><div><span class="info-label">중요도</span><br><span style="color:var(--gold); font-size:1.8rem; cursor:pointer;" onclick="if(!isReader)updateForeshadowStars(${item.origIdx})">${'★'.repeat(stars || 1)}${'☆'.repeat(5 - (stars || 1))}</span></div><button style="padding:10px 25px; border-radius:30px; border:none; font-weight:800; cursor:pointer; color:#fff; box-shadow:var(--shadow); background:${item.solved?'var(--status-green)':'var(--munpia-red)'}" onclick="if(!isReader)toggleForeshadowSolved(${item.origIdx})">${item.solved ? '✓ 회수 완료' : '⚠ 미회수'}</button></div><div class="info-grid"><div class="info-box"><span class="info-label">투척 화수</span><div class="info-val" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'habitat', this.innerText)">${item.habitat || '0'}</div></div><div class="info-box"><span class="info-label">회수 예정 화수</span><div class="info-val" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'weakness', this.innerText)">${item.weakness || '0'}</div></div></div><div class="editable-area" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'content', this.innerText)">${item.content || ''}</div>`;
-            } else { // 일반 설정
-                if (item.type === 0) specificLayout += `<div class="zoom-controls author-only"><button class="btn-zoom" onclick="setWideMode(true)">↔ 넓게</button><button class="btn-zoom" onclick="setWideMode(false)">→← 좁게</button></div>`;
-                else setWideMode(false);
+                specificLayout = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;"><div><span class="info-label">중요도</span><br><span style="color:var(--gold); font-size:1.8rem; cursor:pointer;" onclick="if(!isReader)updateForeshadowStars(${item.origIdx})">${'★'.repeat(stars || 1)}${'☆'.repeat(5 - (stars || 1))}</span></div><button style="padding:10px 25px; border-radius:30px; border:none; font-weight:800; cursor:pointer; color:#fff; background:${item.solved?'var(--status-green)':'var(--munpia-red)'}" onclick="if(!isReader)toggleForeshadowSolved(${item.origIdx})">${item.solved ? '✓ 회수 완료' : '⚠ 미회수'}</button></div><div class="info-grid"><div class="info-box"><span class="info-label">투척 화수</span><div class="info-val" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'habitat', this.innerText)">${item.habitat || '0'}</div></div><div class="info-box"><span class="info-label">회수 예정 화수</span><div class="info-val" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'weakness', this.innerText)">${item.weakness || '0'}</div></div></div><div class="editable-area" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'content', this.innerText)">${item.content || ''}</div>`;
+            } else { // 일반
+                if (item.type === 0) specificLayout += `<div class="zoom-controls author-only"><button class="btn-zoom" onclick="setWideMode(true)">↔ 넓게</button></div>`;
                 specificLayout += `${(item.type !== 3 && item.type !== 0 && item.type < 4) ? `<div class="danger-zone" onclick="if(!isReader)updateDanger(${item.origIdx})">위험도 ${'★'.repeat(item.danger || 1)}${'☆'.repeat(10 - (item.danger || 1))}</div>` : ''}${(item.type !== 0 && item.type < 4) ? `<div class="info-grid"><div class="info-box"><span class="info-label ${isHighDanger?'high-danger-text':''}">생태 / 배경</span><div class="info-val" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'habitat', this.innerText)">${item.habitat || ''}</div></div><div class="info-box"><span class="info-label ${isHighDanger?'high-danger-text':''}">약점 / 특징</span><div class="info-val" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'weakness', this.innerText)">${item.weakness || ''}</div></div></div>` : ''}<div class="editable-area ${isHighDanger?'high-danger-text':''}" contenteditable="${editable}" oninput="liveUpdate(${item.origIdx}, 'content', this.innerText)">${item.content || ''}</div><div class="author-note author-only" style="margin-top:40px; padding:25px; background:var(--bg); border:1px dashed var(--accent); opacity:0.7; border-radius:14px;"><div class="info-label">작가 메모</div><div contenteditable="true" oninput="liveUpdate(${item.origIdx}, 'authorMemo', this.innerText)">${item.authorMemo || ''}</div></div>`;
             }
 
@@ -327,13 +301,7 @@
         renderSidebar();
     }
 
-    function addNewNovel() {
-        let n = prompt("새 소설 제목:"); if (!n) return;
-        const s = [ {t:0, n:"세계관 개요"}, {t:1, n:"주요 등장인물"}, {t:4, n:"인물 관계도"}, {t:6, n:"복선 체크리스트"}, {t:7, n:"메인 에피소드"}, {t:8, n:"병렬 연대기"}, {t:9, n:"데일리 연재로그"} ];
-        s.forEach(x => wikiData.push({ novel: n, type: x.t, title: x.n, content: "", danger: 1, habitat: "", weakness: "", authorMemo: "", munpia: 0, novelpia: 0, mStamp: false, nStamp: false, solved: false, relColors: "" }));
-        saveAndRender(); alert("새 소설 프로젝트가 생성되었습니다.");
-    }
-
+    function addNewNovel() { let n = prompt("새 소설 제목:"); if (!n) return; const s = [ {t:0, n:"세계관 개요"}, {t:1, n:"주요 등장인물"}, {t:4, n:"인물 관계도"}, {t:6, n:"복선 체크리스트"}, {t:7, n:"메인 에피소드"}, {t:8, n:"병렬 연대기"}, {t:9, n:"데일리 연재로그"} ]; s.forEach(x => wikiData.push({ novel: n, type: x.t, title: x.n, content: "", danger: 1, habitat: "", weakness: "", authorMemo: "", munpia: 0, novelpia: 0, mStamp: false, nStamp: false, solved: false, relColors: "" })); saveAndRender(); }
     function updateForeshadowStars(idx) { const val = prompt("중요도 (1-5)", wikiData[idx].danger || 1); const num = parseInt(val); if(!isNaN(num)) { wikiData[idx].danger = num; saveAndRender(); } }
     function toggleForeshadowSolved(idx) { wikiData[idx].solved = !wikiData[idx].solved; saveAndRender(); }
     function stampToggle(idx, type) { if(type==='m') wikiData[idx].mStamp=!wikiData[idx].mStamp; else wikiData[idx].nStamp=!wikiData[idx].nStamp; saveAndRender(); }
@@ -347,7 +315,7 @@
     function deleteItem(idx) { if(confirm("삭제할까요?")) { wikiData.splice(idx, 1); saveAndRender(); currentPage = 2; renderPage(); } }
     function deleteEntireNovel() { if (currentNovelFilter === "all") return; if (confirm("소설 전체를 삭제할까요?")) { wikiData = wikiData.filter(d => d.novel !== currentNovelFilter); saveAndRender(); currentNovelFilter = "all"; currentPage = 2; renderPage(); } }
     function changeNovel(v) { currentNovelFilter = v; document.documentElement.style.setProperty('--accent', novelThemes[v]||'#1d1d1f'); currentPage = 2; renderPage(); }
-    function exportData() { localStorage.setItem('chunGakLastBackup', new Date().toISOString()); const d = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(wikiData)); const a = document.createElement('a'); a.setAttribute("href", d); a.setAttribute("download", "천각_아카이브_Ver3.4.json"); a.click(); }
+    function exportData() { localStorage.setItem('chunGakLastBackup', new Date().toISOString()); const d = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(wikiData)); const a = document.createElement('a'); a.setAttribute("href", d); a.setAttribute("download", "천각_Ver3.6_백업.json"); a.click(); }
     function copyFullCode() { let h = document.documentElement.outerHTML.replace(/let wikiData = \[[\s\S]*?\];/, `let wikiData = ${JSON.stringify(wikiData)};`); navigator.clipboard.writeText(h).then(() => alert("전체 소스 복사!")); }
     function copyReaderLink() { navigator.clipboard.writeText("https://sasayus.github.io/library/?mode=read").then(() => alert("독자 링크 복사!")); }
     
