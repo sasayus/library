@@ -1,98 +1,118 @@
 <html lang="ko"><head>
     <meta charset="UTF-8">
-    <title>작가 천각 아카이브 Ver 30.2 (Final Immutable)</title>
+    <title>작가 천각 아카이브 V3 (Security Enhanced)</title>
     <style>
         :root { 
             --bg: #f5f5f7; --card: #ffffff; --sidebar: #ffffff;
             --text: #1d1d1f; --sub-text: #86868b; --accent: #1d1d1f; 
             --border: #e5e5e7; --shadow: 0 12px 40px rgba(0,0,0,0.08);
             --munpia: #d32f2f; --novel: #1976d2; --monster: #d70015;
-            --rel-black: #1d1d1f; --rel-pink: #ff2d55; --rel-blue: #007aff; --rel-red: #ff3b30;
-            --bookmark: #ffcc00; --star-gold: #ffcc00; --star-red: #ff3b30; --star-gray: #8e8e93;
-            --timeline: #5856d6;
+            --rel-pink: #ff2d55; --rel-blue: #007aff; --rel-red: #ff3b30;
+            --bookmark: #ffcc00; --star-gold: #ffcc00; --star-red: #ff3b30;
+            --low: #34c759; --mid: #ffcc00; --high: #ff3b30;
         }
-        body.dark-mode { --bg: #1c1c1e; --card: #2c2c2e; --sidebar: #2c2c2e; --text: #f5f5f7; --border: #3a3a3c; }
         body { font-family: 'Pretendard', sans-serif; background: var(--bg); color: var(--text); display: flex; margin: 0; height: 100vh; overflow: hidden; transition: 0.3s; }
         
-        /* 독자 모드 처리 */
-        body.reader-mode .author-only, body.reader-mode .side-cat-6, body.reader-mode .side-cat-9 { display: none !important; }
+        /* [보안 강화] 독자 모드: 세계관(0), 복선(6), 연재(9) 전면 은폐 */
+        body.reader-mode .author-only, 
+        body.reader-mode .side-cat-0, 
+        body.reader-mode .side-cat-6, 
+        body.reader-mode .side-cat-9 { display: none !important; }
 
-        /* 사이드바 */
-        nav { width: 300px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 25px 20px; overflow-y: auto; display: flex; flex-direction: column; z-index: 100; transition: 0.4s; }
-        nav h2 { font-size: 1.1rem; border-bottom: 2px solid var(--text); padding-bottom: 15px; margin-bottom: 20px; text-align: center; font-weight: 800; cursor: pointer; }
+        /* 사이드바 접기 */
+        nav { width: 300px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 25px 20px; overflow-y: auto; display: flex; flex-direction: column; z-index: 100; transition: transform 0.4s, width 0.4s; position: relative; }
+        nav.folded { width: 0; padding: 0; border-right: none; transform: translateX(-300px); }
+        .toggle-btn { position: fixed; left: 310px; top: 20px; z-index: 200; background: var(--card); border: 1px solid var(--border); border-radius: 50%; width: 35px; height: 35px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); transition: 0.4s; font-size: 0.8rem; font-weight: 900; }
+        nav.folded + .toggle-btn { left: 20px; transform: rotate(180deg); }
+
         .theme-dots { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; }
         .dot { width: 18px; height: 18px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
-        .novel-selector { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; font-weight: 700; background: var(--card); color: var(--text); border-left: 5px solid var(--accent); cursor: pointer; outline: none; }
-        
-        #sidebar-menu { flex: 1; overflow-y: auto; }
+        .novel-selector { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; font-weight: 700; background: var(--card); border-left: 5px solid var(--accent); cursor: pointer; outline: none; }
         .side-cat { font-size: 0.75rem; color: var(--accent); font-weight: 800; margin-top: 18px; border-bottom: 1px solid var(--border); padding: 8px 0; display: flex; justify-content: space-between; align-items: center; }
         .side-item { font-size: 0.85rem; padding: 10px 14px; cursor: pointer; border-radius: 8px; margin-top: 4px; transition: 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .side-item.active { background: var(--accent); color: #fff; font-weight: 700; box-shadow: var(--shadow); }
+        .side-item.active { background: var(--accent); color: #fff; font-weight: 700; }
 
-        /* 메인 영역 */
-        main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 60px; align-items: center; position: relative; }
-        .wiki-card { background: var(--card); padding: 60px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.03); width: 100%; max-width: 850px; min-height: 800px; border-top: 10px solid var(--accent); position: relative; transition: 0.4s; }
+        /* 메인 콘텐츠 */
+        main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 60px; align-items: center; position: relative; transition: 0.4s; }
+        .wiki-card { background: var(--card); padding: 60px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.03); width: 100%; max-width: 900px; min-height: 800px; border-top: 10px solid var(--accent); position: relative; }
         .editor { line-height: 2.1; font-size: 1.15rem; outline: none; min-height: 350px; white-space: pre-wrap; padding: 25px; background: rgba(0,0,0,0.015); border-radius: 14px; border: 1px solid var(--border); margin-top: 25px; }
 
-        /* 특수 UI 요소들 */
-        .diff-badge { padding: 10px 20px; border-radius: 12px; font-size: 0.9rem; font-weight: 900; display: inline-block; margin-bottom: 20px; cursor: pointer; }
-        .diff-low { background: #e8f5e9; color: #2e7d32; } .diff-mid { background: #fff8e1; color: #f57f17; } .diff-high { background: #ffebee; color: #d32f2f; }
-        
+        /* 난이도 세그먼트 */
+        .diff-selector { display: flex; background: #eee; border-radius: 12px; padding: 4px; gap: 4px; width: fit-content; margin-bottom: 25px; }
+        .diff-opt { padding: 10px 22px; border-radius: 8px; font-size: 0.85rem; font-weight: 800; cursor: pointer; transition: 0.3s; color: #888; border: none; }
+        .diff-opt.active.low { background: var(--low); color: white; box-shadow: 0 4px 12px rgba(52, 199, 89, 0.4); }
+        .diff-opt.active.mid { background: var(--mid); color: white; box-shadow: 0 4px 12px rgba(255, 204, 0, 0.4); }
+        .diff-opt.active.high { background: var(--high); color: white; box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4); }
+
+        /* 캐릭터 태그 */
+        .char-tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; padding: 15px; background: #f1f2f6; border-radius: 12px; border-left: 5px solid var(--accent); }
+        .char-tag { background: var(--accent); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+
+        /* 몬스터 별점 */
         .star-box { font-size: 1.5rem; letter-spacing: 5px; cursor: pointer; display: inline-block; }
-        .star-gold { color: var(--star-gold) !important; } .star-red { color: var(--star-red) !important; } .star-gray { color: var(--star-gray) !important; }
         .star-rainbow { background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: rainbow 2s infinite linear; }
         @keyframes rainbow { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+        .star-red { color: var(--star-red) !important; } .star-gold { color: var(--star-gold) !important; }
 
-        .org-wrap { margin-left: 35px; border-left: 2px solid var(--border); padding-left: 20px; position: relative; margin-top: 12px; }
-        .org-card { background: #fff; border: 1px solid var(--border); padding: 12px 18px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 8px; display: inline-flex; align-items: center; gap: 10px; min-width: 220px; }
-        .org-name { font-weight: 800; cursor: pointer; font-size: 1rem; flex: 1; }
-
+        /* 그리드 및 테이블 */
         .log-grid { display: grid; grid-template-columns: 120px 1fr 40px; gap: 8px; margin-bottom: 8px; background: #f9f9fb; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
-        .log-input { border: 1px solid var(--border); padding: 8px; border-radius: 6px; font-size: 0.85rem; outline: none; background: #fff; }
+        .log-input { border: 1px solid var(--border); padding: 8px; border-radius: 6px; font-size: 0.85rem; outline: none; background: #fff; width: 100%; box-sizing: border-box; }
+        .plot-table { width: 100%; border-collapse: collapse; margin: 15px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+        .plot-table th { background: #fafafa; font-size: 0.8rem; padding: 10px; border-bottom: 1px solid var(--border); }
+        .plot-table td { padding: 10px; border-bottom: 1px solid var(--border); background: #fff; }
 
-        .side-bookmark { position: absolute; top: 50%; right: -15px; width: 22px; height: 90px; background: var(--bookmark); color: #5d4037; font-weight: 900; writing-mode: vertical-rl; text-align: center; line-height: 22px; border-radius: 6px 0 0 6px; cursor: pointer; z-index: 100; transition: 0.3s; transform: translateY(-50%); font-size: 0.75rem; box-shadow: -2px 0 10px rgba(0,0,0,0.1); }
-        .side-memo-box { position: absolute; top: 50%; right: -320px; width: 280px; height: 400px; background: #fff9c4; border-radius: 15px; padding: 25px; box-shadow: 10px 10px 30px rgba(0,0,0,0.1); z-index: 99; transition: 0.3s; outline: none; overflow-y: auto; display: none; transform: translateY(-50%); border-left: 8px solid #fbc02d; font-family: 'Nanum Pen Script', cursive; }
-        .side-memo-box.active { right: 5px; display: block; }
-        .side-bookmark.active { right: 285px; border-radius: 0 6px 6px 0; }
+        /* 캘린더 */
+        .cal-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+        .cal-day { aspect-ratio: 1/1; border: 1px solid var(--border); border-radius: 8px; position: relative; overflow: hidden; cursor: pointer; background: #fff; }
+        .stamp-m { position: absolute; left: 0; width: 50%; height: 100%; background: rgba(211,47,47,0.2); display: flex; align-items:center; justify-content:center; color: var(--munpia); font-weight: 900; font-size: 0.6rem; opacity: 0; }
+        .stamp-n { position: absolute; right: 0; width: 50%; height: 100%; background: rgba(25,118,210,0.2); display: flex; align-items:center; justify-content:center; color: var(--novel); font-weight: 900; font-size: 0.6rem; opacity: 0; }
+        .stamp-m.done, .stamp-n.done { opacity: 1; }
 
+        /* 작가 전용 UI */
         .author-tools { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--border); padding-top: 20px; margin-top: auto; }
-        .btn-tool { background: var(--card); border: 1px solid var(--border); padding: 10px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.75rem; text-align: center; transition: 0.2s; }
-        .btn-tool:hover { transform: translateY(-2px); }
-
+        .btn-tool { background: var(--card); border: 1px solid var(--border); padding: 10px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.75rem; text-align: center; }
+        .side-bookmark { position: absolute; top: 150px; right: -15px; width: 22px; height: 90px; background: #ffcc00; font-weight: 900; writing-mode: vertical-rl; text-align: center; border-radius: 6px 0 0 6px; cursor: pointer; z-index: 100; transition: 0.3s; font-size: 0.75rem; }
+        .side-memo-box { position: absolute; top: 150px; right: -320px; width: 280px; height: 400px; background: #fff9c4; border-radius: 15px; padding: 25px; box-shadow: 10px 10px 30px rgba(0,0,0,0.1); z-index: 99; transition: 0.3s; display: none; border-left: 8px solid #fbc02d; font-family: 'Nanum Pen Script', cursive; overflow-y: auto; }
+        .side-memo-box.active { right: 5px; display: block; }
         .widget-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .widget-card { background: #fff; width: 90%; max-width: 1000px; height: 80%; border-radius: 24px; padding: 40px; box-shadow: var(--shadow); overflow-y: auto; }
+        .widget-card { background: #fff; width: 90%; max-width: 1000px; height: 80%; border-radius: 24px; padding: 40px; overflow-y: auto; }
     </style>
 </head>
 <body onload="init()">
 
 <nav id="sidebar">
-    <h2 onclick="location.reload()">CHUNGAK ARCHIVE 30.2</h2>
+    <h2 onclick="location.reload()" style="cursor:pointer;">CHUNGAK ARCHIVE V3</h2>
     <div class="theme-dots author-only">
         <div class="dot" style="background:#1d1d1f" onclick="setTheme('#1d1d1f')"></div>
         <div class="dot" style="background:#b71c1c" onclick="setTheme('#b71c1c')"></div>
         <div class="dot" style="background:#1a237e" onclick="setTheme('#1a237e')"></div>
         <div class="dot" style="background:#1b5e20" onclick="setTheme('#1b5e20')"></div>
     </div>
-    <select id="novel-selector" class="novel-selector" onchange="switchNovel(this.value)"><option value="all">전체 프로젝트 보기</option><option value="기존 소설">기존 소설</option><option value="1" selected="">1</option></select>
-    <div id="sidebar-menu" style="flex:1;"><div class="side-cat side-cat-0"><span>0. 세계관</span><span class="author-only" onclick="addItem(0)">+</span></div><div class="side-item " onclick="goPage(4)">0. 세계관 초기 항목</div><div class="side-cat side-cat-1"><span>1. 캐릭터</span><span class="author-only" onclick="addItem(1)">+</span></div><div class="side-item " onclick="goPage(5)">1. 캐릭터 초기 항목</div><div class="side-cat side-cat-2"><span>2. 몬스터(공통)</span><span class="author-only" onclick="addItem(2)">+</span></div><div class="side-item " onclick="goPage(3)">스켈레톤</div><div class="side-item " onclick="goPage(6)">2. 몬스터(공통) 초기 항목</div><div class="side-cat side-cat-3"><span>3. 짜투리</span><span class="author-only" onclick="addItem(3)">+</span></div><div class="side-item " onclick="goPage(7)">3. 짜투리 초기 항목</div><div class="side-cat side-cat-4"><span>4. 가계도</span><span class="author-only" onclick="addItem(4)">+</span></div><div class="side-item " onclick="goPage(8)">4. 가계도 초기 항목</div><div class="side-cat side-cat-5"><span>5. 연대기</span><span class="author-only" onclick="addItem(5)">+</span></div><div class="side-item " onclick="goPage(9)">5. 연대기 초기 항목</div><div class="side-cat side-cat-6"><span>6. 복선 현황</span><span class="author-only" onclick="addItem(6)">+</span></div><div class="side-item " onclick="goPage(10)">6. 복선 현황 초기 항목</div><div class="side-cat side-cat-7"><span>7. 스토리보드</span><span class="author-only" onclick="addItem(7)">+</span></div><div class="side-item " onclick="goPage(11)">7. 스토리보드 초기 항목</div><div class="side-cat side-cat-8"><span>8. 멀티버스</span><span class="author-only" onclick="addItem(8)">+</span></div><div class="side-item " onclick="goPage(12)">8. 멀티버스 초기 항목</div><div class="side-cat side-cat-9"><span>9. 연재 현황</span><span class="author-only" onclick="addItem(9)">+</span></div><div class="side-item " onclick="goPage(13)">9. 연재 현황 초기 항목</div></div>
-    
+    <select id="novel-selector" class="novel-selector" onchange="switchNovel(this.value)"><option value="all">전체 프로젝트 보기</option><option value="조선 판타지">조선 판타지</option><option value="고귀한 뱀파이어" selected="">고귀한 뱀파이어</option></select>
+    <div id="sidebar-menu"><div class="side-cat side-cat-0"><span>0. 세계관</span><span class="author-only" onclick="addItem(0)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(11)">0. 세계관 초기 항목</div><div class="side-cat side-cat-1"><span>1. 캐릭터</span><span class="author-only" onclick="addItem(1)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(12)">1. 캐릭터 초기 항목</div><div class="side-cat side-cat-2"><span>2. 몬스터(공통)</span><span class="author-only" onclick="addItem(2)" style="cursor:pointer;">+</span></div><div class="side-item active" onclick="goPage(1)">스켈레톤</div><div class="side-cat side-cat-3"><span>3. 짜투리</span><span class="author-only" onclick="addItem(3)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(13)">3. 짜투리 초기 항목</div><div class="side-cat side-cat-4"><span>4. 가계도</span><span class="author-only" onclick="addItem(4)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(14)">4. 가계도 초기 항목</div><div class="side-cat side-cat-5"><span>5. 연대기</span><span class="author-only" onclick="addItem(5)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(15)">5. 연대기 초기 항목</div><div class="side-cat side-cat-6"><span>6. 복선 현황</span><span class="author-only" onclick="addItem(6)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(16)">6. 복선 현황 초기 항목</div><div class="side-cat side-cat-7"><span>7. 스토리보드</span><span class="author-only" onclick="addItem(7)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(17)">7. 스토리보드 초기 항목</div><div class="side-cat side-cat-8"><span>8. 멀티버스</span><span class="author-only" onclick="addItem(8)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(18)">8. 멀티버스 초기 항목</div><div class="side-cat side-cat-9"><span>9. 연재 &amp; 캘린더</span><span class="author-only" onclick="addItem(9)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(19)">9. 연재 &amp; 캘린더 초기 항목</div></div>
     <div class="author-tools author-only">
         <button class="btn-tool" style="background:var(--accent); color:#fff;" onclick="copyFullSource()">💾 전체 소스 복사</button>
-        <button class="btn-tool" style="color:var(--novel);" onclick="copyReaderLink()">🔗 독자용 링크 복사</button>
-        <button class="btn-tool" onclick="toggleNarrativeTable()">📊 서사 대조표</button>
-        <button class="btn-tool" style="color:var(--status-green);" onclick="createNewProject()">✚ 새 소설 추가</button>
+        <button class="btn-tool" style="color:var(--novel);" onclick="copyReaderLink()">🔗 독자용 링크 생성</button>
+        <button class="btn-tool" onclick="toggleNarrativeTable()">📊 서사 대조표 보기</button>
+        <button class="btn-tool" style="color:#28a745;" onclick="createNewProject()">✚ 새 소설 추가</button>
         <button class="btn-tool" onclick="exportData()">데이터 백업(JSON)</button>
-        <button class="btn-tool" style="color:var(--rel-red);" onclick="deleteEntireProject()">⚠️ 프로젝트 삭제</button>
+        <button class="btn-tool" style="color:var(--rel-red);" onclick="deleteEntireProject()">⚠️ 프로젝트 전체 삭제</button>
     </div>
 </nav>
 
-<main>
-    <div id="main-card-slot"><div class="wiki-card"><div style="font-size:0.75rem; color:var(--sub-text); text-align:right;">[기존 소설] 0. 세계관</div><h1 contenteditable="true" oninput="update('title', this.innerText)">세계관 개요</h1><div id="m-tab" class="side-bookmark author-only" onclick="toggleMemo()">MEMO</div><div id="m-box" class="side-memo-box" contenteditable="true" oninput="update('memo', this.innerText)"></div><button class="author-only" style="position:absolute; top:20px; left:20px; border:none; background:none; color:red; cursor:pointer; font-weight:900; opacity:0.3;" onclick="deleteItem()">✕ DELETE</button><div style="background:#f0f0f5; color:var(--accent); padding:4px 12px; border-radius:20px; font-size:0.7rem; font-weight:800; display:inline-block; margin-bottom:10px;" contenteditable="true" oninput="update('subCat', this.innerText)">소분류...</div><div class="diff-badge diff-low" onclick="cycleAcc(0)">판별: 집필 가능</div>
-                   <div style="background:#f8f9fa; border-left:6px solid var(--accent); padding:20px; border-radius:12px; margin-bottom:20px;" contenteditable="true" oninput="update('analysis', this.innerText)">◈ 집필 분석
-- 판별등급: 
-- 핵심 키워드: 
-- 초보작가 주의사항: 
-- 소설 주의사항: </div><div class="editor" contenteditable="true" oninput="update('content', this.innerText)">천각 작가의 우주.</div></div></div>
+<div class="toggle-btn author-only" onclick="toggleSidebar()">◀</div>
+
+<main id="main-content">
+    <div id="main-card-slot"><div class="wiki-card">
+            <div style="font-size:0.75rem; color:var(--sub-text); text-align:right;">[공통] 2. 몬스터(공통)</div>
+            <h1 contenteditable="true" oninput="update('title', this.innerText)">스켈레톤</h1><div id="m-tab" class="side-bookmark author-only" onclick="toggleMemo()">MEMO</div><div id="m-box" class="side-memo-box" contenteditable="true" oninput="update('memo', this.innerText)"></div><button class="author-only" style="position:absolute; top:20px; left:20px; border:none; background:none; color:red; cursor:pointer; font-weight:900; opacity:0.3;" onclick="deleteItem()">✕ DELETE</button><div class="info-grid">
+                <div class="info-box"><small>배경/생태</small><div contenteditable="true" oninput="update('habitat',this.innerText)" style="outline:none;">던전</div></div>
+                <div class="info-box"><small>약점/능력</small><div contenteditable="true" oninput="update('weakness',this.innerText)" style="outline:none;">타격/성속성</div></div>
+            </div><div class="star-box star-gold" onclick="cycleDanger(0)">★☆☆☆☆☆☆☆☆☆</div>
+                       <div style="background:#fff5f5; border-left:6px solid var(--monster); padding:15px; border-radius:12px; margin-top:15px;"><b>증언:</b><div contenteditable="true" oninput="update('testimony', this.innerText)" style="outline:none;">뼈 소리가 들리면 늦었다.</div></div>
+            <div class="editor" contenteditable="true" oninput="update('content', this.innerText)" onkeyup="if(2===9) renderPage()"></div>
+        </div></div>
 </main>
 
 <div id="narrative-modal" class="widget-overlay" onclick="toggleNarrativeTable()">
@@ -107,141 +127,205 @@
 </div>
 
 <script>
-    const categories = ["0. 세계관", "1. 캐릭터", "2. 몬스터(공통)", "3. 짜투리", "4. 가계도", "5. 연대기", "6. 복선 현황", "7. 스토리보드", "8. 멀티버스", "9. 연재 현황"];
-    const analysisTemplate = "◈ 집필 분석\n- 판별등급: \n- 핵심 키워드: \n- 초보작가 주의사항: \n- 소설 주의사항: ";
-    const diffLabels = { "하": "집필 가능", "중": "완결 후 도전", "상": "집필 당장 불가능" };
+    const categories = ["0. 세계관", "1. 캐릭터", "2. 몬스터(공통)", "3. 짜투리", "4. 가계도", "5. 연대기", "6. 복선 현황", "7. 스토리보드", "8. 멀티버스", "9. 연재 & 캘린더"];
+    const analysisTemplate = "◈ 집필 분석\n- 로그라인: \n- 집필 난이도 판별: \n- 세계관 분석: \n- 글을 쓸 때의 주의사항: \n- 초보 작가로서의 주의 사항: ";
 
     let wikiData = [];
     let currentNovel = localStorage.getItem('currentNovel') || "all";
     let currentPage = 1;
+    let selectedDate = new Date().toISOString().split('T')[0];
 
     function init() {
         if (window.location.search.includes('mode=read')) document.body.classList.add('reader-mode');
-        const keys = ['chunGakData_v30','chunGakData_v29','chunGakData_v28','chunGakData_v27','chunGakData_v26','chunGakData_v23'];
-        let recovered = null;
-        for (let key of keys) {
-            const d = localStorage.getItem(key);
-            if (d) { recovered = JSON.parse(d); break; }
+        const saved = localStorage.getItem('chunGakData_v3');
+        if (saved) {
+            wikiData = JSON.parse(saved);
+        } else {
+            wikiData = [
+                { novel: "전생상광증", type: 0, title: "세계관 개요", analysis: analysisTemplate, accessibility: "하" },
+                { novel: "전생상광증", type: 1, title: "로인 카밀루스", habitat: "지하 거주구", weakness: "마력 반동", content: "건블레이드 사용자." },
+                { novel: "공통", type: 2, title: "스켈레톤", danger: 10, habitat: "던전", weakness: "타격/성속성", testimony: "뼈 소리가 들리면 늦었다." },
+                { novel: "전생상광증", type: 9, title: "2026 연재 & 캘린더", stamps: {}, visibleMonths: 1 }
+            ];
         }
-        wikiData = recovered || [
-            { novel: "기존 소설", type: 0, title: "세계관 개요", analysis: analysisTemplate, accessibility: "하" },
-            { novel: "기존 소설", type: 1, title: "로인 카밀루스", content: "주역." },
-            { novel: "기존 소설", type: 2, title: "스켈레톤", danger: 2, testimony: "뼈 소리..." }
-        ];
         save(); updateSelector(); renderSidebar(); renderPage();
     }
+
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('folded'); }
 
     function renderPage() {
         const slot = document.getElementById('main-card-slot');
         const item = wikiData[currentPage - 1];
         if (!item) return;
 
-        let ui = `<div id="m-tab" class="side-bookmark author-only" onclick="toggleMemo()">MEMO</div><div id="m-box" class="side-memo-box" contenteditable="true" oninput="update('memo', this.innerText)">${item.memo || ''}</div>`;
-        ui += `<button class="author-only" style="position:absolute; top:20px; left:20px; border:none; background:none; color:red; cursor:pointer; font-weight:900; opacity:0.3;" onclick="deleteItem()">✕ DELETE</button>`;
-        ui += `<div style="background:#f0f0f5; color:var(--accent); padding:4px 12px; border-radius:20px; font-size:0.7rem; font-weight:800; display:inline-block; margin-bottom:10px;" contenteditable="true" oninput="update('subCat', this.innerText)">${item.subCat || '소분류...'}</div>`;
-
-        if (item.type === 0) {
-            const acc = item.accessibility || "하";
-            const bClass = acc === '상' ? 'diff-high' : (acc === '중' ? 'diff-mid' : 'diff-low');
-            ui += `<div class="diff-badge ${bClass}" onclick="cycleAcc(${currentPage-1})">판별: ${diffLabels[acc]}</div>
-                   <div style="background:#f8f9fa; border-left:6px solid var(--accent); padding:20px; border-radius:12px; margin-bottom:20px;" contenteditable="true" oninput="update('analysis', this.innerText)">${item.analysis || analysisTemplate}</div>`;
-        }
-
-        if (item.type === 2 || item.type === 1) {
-            ui += `<div class="info-grid"><div class="info-box"><small>배경/생태</small><div contenteditable="true" oninput="update('habitat',this.innerText)">${item.habitat||''}</div></div><div class="info-box"><small>약점/능력</small><div contenteditable="true" oninput="update('weakness',this.innerText)">${item.weakness||''}</div></div></div>`;
-            if (item.type === 2) {
-                const d = item.danger || 1;
-                let sClass = 'star-gold';
-                if (d >= 10) sClass = 'star-rainbow'; else if (d === 9) sClass = 'star-gray'; else if (d >= 6) sClass = 'star-red';
-                ui += `<div class="star-box ${sClass}" onclick="cycleDanger(${currentPage-1})">${'★'.repeat(d)}${'☆'.repeat(10-d)}</div>
-                       <div style="background:#fff5f5; border-left:6px solid var(--monster); padding:15px; border-radius:12px;"><b>증언:</b><div contenteditable="true" oninput="update('testimony', this.innerText)">${item.testimony||''}</div></div>`;
+        // [보호 로직] 서사 카테고리 캐릭터 부재 알림
+        if ([5, 7, 8].includes(item.type)) {
+            const currentChars = wikiData.filter(d => d.type === 1 && (d.novel === currentNovel || d.novel === "공통"));
+            if (currentChars.length === 0) {
+                alert("서사의 주인이 없습니다. 캐릭터를 먼저 추가해주세요!");
+                addItem(1); return;
             }
         }
 
-        if (item.type === 4) {
-            if(!item.nodes) item.nodes = [{id:Date.now(), name:"로인 카밀루스", color:"var(--rel-pink)", children:[]}];
-            ui += `<div id="org-tree">${renderNodes(item.nodes)}</div>`;
+        let ui = `<div id="m-tab" class="side-bookmark author-only" onclick="toggleMemo()">MEMO</div><div id="m-box" class="side-memo-box" contenteditable="true" oninput="update('memo', this.innerText)">${item.memo || ''}</div>`;
+        ui += `<button class="author-only" style="position:absolute; top:20px; left:20px; border:none; background:none; color:red; cursor:pointer; font-weight:900; opacity:0.3;" onclick="deleteItem()">✕ DELETE</button>`;
+
+        // 캐릭터 점프 태그
+        if ([5, 7, 8].includes(item.type)) {
+            const chars = wikiData.filter(d => d.type === 1 && (d.novel === currentNovel || d.novel === "공통"));
+            ui += `<div class="char-tag-container author-only"><small style="width:100%; margin-bottom:5px; font-weight:800; color:var(--sub-text);"># 캐릭터 설정 바로가기:</small>${chars.map(c => `<span class="char-tag" onclick="jumpToChar('${c.title}')">${c.title}</span>`).join('')}</div>`;
+        }
+
+        if (item.type === 1 || item.type === 2) {
+            ui += `<div class="info-grid">
+                <div class="info-box"><small>배경/생태</small><div contenteditable="true" oninput="update('habitat',this.innerText)" style="outline:none;">${item.habitat||''}</div></div>
+                <div class="info-box"><small>약점/능력</small><div contenteditable="true" oninput="update('weakness',this.innerText)" style="outline:none;">${item.weakness||''}</div></div>
+            </div>`;
+            if (item.type === 2) {
+                const d = item.danger || 1;
+                let sClass = (d >= 10) ? 'star-rainbow' : (d >= 6 ? 'star-red' : 'star-gold');
+                ui += `<div class="star-box ${sClass}" onclick="cycleDanger(${currentPage-1})">${'★'.repeat(d)}${'☆'.repeat(10-d)}</div>
+                       <div style="background:#fff5f5; border-left:6px solid var(--monster); padding:15px; border-radius:12px; margin-top:15px;"><b>증언:</b><div contenteditable="true" oninput="update('testimony', this.innerText)" style="outline:none;">${item.testimony||''}</div></div>`;
+            }
+        }
+
+        if (item.type === 0) {
+            const acc = item.accessibility || "하";
+            ui += `<div class="diff-selector author-only">
+                <div class="diff-opt low ${acc==='하'?'active':''}" onclick="setAcc('하')">당장 집필</div>
+                <div class="diff-opt mid ${acc==='중'?'active':''}" onclick="setAcc('중')">현재는 어려움</div>
+                <div class="diff-opt high ${acc==='상'?'active':''}" onclick="setAcc('상')">한참 뒤에 집필</div>
+            </div>
+            <div style="background:#f8f9fa; border-left:6px solid var(--accent); padding:20px; border-radius:12px; margin-bottom:20px;" contenteditable="true" oninput="update('analysis', this.innerText)">${item.analysis || analysisTemplate}</div>`;
         }
 
         if (item.type === 6) {
             if(!item.plots) item.plots = [{solved:false, desc:"", sown:"", reaped:""}];
-            ui += `<div style="border:1px solid var(--border); border-radius:12px; overflow:hidden; margin:15px 0;">
-                <div style="display:grid; grid-template-columns:50px 1fr 80px 80px; padding:10px; background:#fafafa; font-weight:800; font-size:0.8rem;"><span>회수</span><span>내용</span><span>뿌림</span><span>회수</span></div>
-                ${item.plots.map((p,i)=>`<div style="display:grid; grid-template-columns:50px 1fr 80px 80px; padding:10px; border-top:1px solid var(--border); align-items:center;"><input type="checkbox" ${p.solved?'checked':''} onchange="updatePlot(${i},'solved',this.checked)"><input style="border:none;outline:none;" value="${p.desc}" oninput="updatePlot(${i},'desc',this.value)"><input style="border:none;outline:none;text-align:center" value="${p.sown}" oninput="updatePlot(${i},'sown',this.value)"><input style="border:none;outline:none;text-align:center" value="${p.reaped}" oninput="updatePlot(${i},'reaped',this.value)"></div>`).join('')}
-            </div><button class="btn-tool author-only" onclick="addPlot()">✚ 복선 추가</button>`;
+            ui += `<table class="plot-table">
+                <thead><tr><th>회수</th><th>내용</th><th>뿌림</th><th>회수</th><th class="author-only">✕</th></tr></thead>
+                <tbody>${item.plots.map((p,i)=>`<tr>
+                    <td><input type="checkbox" ${p.solved?'checked':''} onchange="updatePlot(${i},'solved',this.checked)"></td>
+                    <td><input class="log-input" style="width:100%" value="${p.desc}" oninput="updatePlot(${i},'desc',this.value)"></td>
+                    <td><input class="log-input" style="width:100%; text-align:center" value="${p.sown}" oninput="updatePlot(${i},'sown',this.value)"></td>
+                    <td><input class="log-input" style="width:100%; text-align:center" value="${p.reaped}" oninput="updatePlot(${i},'reaped',this.value)"></td>
+                    <td class="author-only"><button onclick="delPlot(${i})" style="border:none;background:none;color:red;cursor:pointer">✕</button></td>
+                </tr>`).join('')}</tbody>
+            </table><button class="btn-tool author-only" onclick="addPlot()">✚ 복선 추가</button>`;
         }
 
-        if ([5, 7, 8].includes(item.type)) {
+        if ([4, 5, 7, 8].includes(item.type)) {
             if(!item.actionLogs) item.actionLogs = [{char:"", act:""}];
-            const chars = wikiData.filter(d => d.type === 1);
-            ui += `<div class="author-only" style="margin-bottom:15px;">${chars.map(c=>`<span style="background:var(--accent); color:#fff; padding:4px 10px; border-radius:6px; font-size:0.75rem; margin-right:5px; cursor:pointer;" onclick="jumpTo('${c.title}')"># ${c.title}</span>`).join('')}</div>
-                   <div style="margin:15px 0;">${item.actionLogs.map((l,i)=>`<div class="log-grid"><input class="log-input" placeholder="인물" value="${l.char}" oninput="updateLog(${i},'char',this.value)"><input class="log-input" placeholder="행동 기록" value="${l.act}" oninput="updateLog(${i},'act',this.value)"><button class="author-only" style="border:none; background:none; color:red; cursor:pointer;" onclick="delLog(${i})">✕</button></div>`).join('')}<button class="btn-tool author-only" onclick="addLog()">✚ 로그 추가</button></div>`;
+            ui += `<div>${item.actionLogs.map((l,i)=>`<div class="log-grid"><input class="log-input" placeholder="인물/단계" value="${l.char}" oninput="updateLog(${i},'char',this.value)"><input class="log-input" placeholder="내용" value="${l.act}" oninput="updateLog(${i},'act',this.value)"><button class="author-only" onclick="delLog(${i})" style="border:none; background:none; color:red; cursor:pointer;">✕</button></div>`).join('')}<button class="btn-tool author-only" onclick="addLog()">✚ 항목 추가</button></div>`;
         }
 
         if (item.type === 9) {
-            ui += `<div class="author-only" style="display:flex; gap:10px; margin-bottom:20px;"><button class="btn-tool" style="flex:1" onclick="inStat('munCount')">문피아 ${item.munCount||0}자</button><button class="btn-tool" style="flex:1" onclick="inStat('novCount')">노벨피아 ${item.novCount||0}자</button></div>`;
+            const txt = item.content || '';
+            const cleanLen = txt.replace(/\s/g,'').length;
+            ui += `<div style="background:#f1f2f6; padding:20px; border-radius:15px; margin-bottom:20px;" class="author-only">
+                <div style="display:flex; gap:10px; margin-bottom:15px;">
+                    <a href="https://gemini.google.com/" target="_blank" class="btn-tool" style="flex:2; background:var(--accent); color:#fff; text-decoration:none;">🎯 AI 퇴고 검수</a>
+                    <button class="btn-tool" style="flex:1" onclick="applyStamp('m')">M 도장</button>
+                    <button class="btn-tool" style="flex:1" onclick="applyStamp('n')">N 도장</button>
+                </div>
+                <b>현황: 공백 제외 ${cleanLen}자 / 선택 날짜: ${selectedDate}</b>
+            </div>
+            <div class="cal-container">${Array.from({length: item.visibleMonths || 1}, (_, i) => renderMonth(2026, i + 1, item.stamps || {})).join('')}</div>
+            <div class="author-only" style="margin-top:20px; text-align:center;"><button class="btn-tool" onclick="addMonth()">✚ 다음 달 추가</button></div>`;
         }
 
-        slot.innerHTML = `<div class="wiki-card"><div style="font-size:0.75rem; color:var(--sub-text); text-align:right;">[${item.novel}] ${categories[item.type]}</div><h1 contenteditable="true" oninput="update('title', this.innerText)">${item.title}</h1>${ui}<div class="editor" contenteditable="true" oninput="update('content', this.innerText)">${item.content || ''}</div></div>`;
+        slot.innerHTML = `<div class="wiki-card">
+            <div style="font-size:0.75rem; color:var(--sub-text); text-align:right;">[${item.novel}] ${categories[item.type]}</div>
+            <h1 contenteditable="true" oninput="update('title', this.innerText)">${item.title}</h1>${ui}
+            <div class="editor" contenteditable="true" oninput="update('content', this.innerText)" onkeyup="if(${item.type}===9) renderPage()">${item.content || ''}</div>
+        </div>`;
     }
 
-    // --- [로직 핵심] ---
-    function renderNodes(nodes) { return nodes.map(n => `<div class="org-wrap"><div class="org-card"><div style="width:12px; height:12px; border-radius:50%; background:${n.color}; cursor:pointer;" onclick="cycleColor(${n.id})"></div><span class="org-name" onclick="jumpTo('${n.name}')">${n.name}</span><button class="author-only" style="border:none;background:none;cursor:pointer;" onclick="addNode(${n.id})">＋</button><button class="author-only" style="border:none;background:none;cursor:pointer;color:red;" onclick="delNode(${n.id})">－</button></div>${n.children?renderNodes(n.children):''}</div>`).join(''); }
-    function cycleAcc(i) { const o=["하","중","상"]; wikiData[i].accessibility=o[(o.indexOf(wikiData[i].accessibility||"하")+1)%3]; save(); renderPage(); }
+    function jumpToChar(name) {
+        const idx = wikiData.findIndex(d => d.type === 1 && d.title === name);
+        if (idx !== -1) { currentPage = idx + 1; renderPage(); renderSidebar(); }
+    }
+    function setAcc(v) { wikiData[currentPage-1].accessibility = v; save(); renderPage(); }
     function cycleDanger(i) { let d=wikiData[i].danger||1; wikiData[i].danger=d>=10?1:d+1; save(); renderPage(); }
-    function cycleColor(id) { const cs=["var(--rel-black)","var(--rel-pink)","var(--rel-blue)","var(--rel-red)"]; const f=(l)=>l.forEach(n=>{if(n.id===id)n.color=cs[(cs.indexOf(n.color)+1)%4];else f(n.children);}); f(wikiData[currentPage-1].nodes); save(); renderPage(); }
     function updateLog(i,f,v) { wikiData[currentPage-1].actionLogs[i][f]=v; save(); }
     function addLog() { wikiData[currentPage-1].actionLogs.push({char:"",act:""}); renderPage(); }
     function delLog(i) { wikiData[currentPage-1].actionLogs.splice(i,1); renderPage(); }
     function updatePlot(i,f,v) { wikiData[currentPage-1].plots[i][f]=v; save(); }
     function addPlot() { wikiData[currentPage-1].plots.push({solved:false,desc:"",sown:"",reaped:""}); renderPage(); }
+    function delPlot(i) { wikiData[currentPage-1].plots.splice(i,1); renderPage(); }
+    function save() { localStorage.setItem('chunGakData_v3', JSON.stringify(wikiData)); }
+    function update(f,v) { wikiData[currentPage-1][f]=v; save(); if(f==='title') renderSidebar(); }
+    function switchNovel(n) { currentNovel=n; localStorage.setItem('currentNovel',n); updateSelector(); renderSidebar(); currentPage=1; renderPage(); }
+    function goPage(n) { currentPage=n; renderPage(); renderSidebar(); }
+    
+    function renderSidebar() {
+        const menu = document.getElementById('sidebar-menu'); menu.innerHTML = '';
+        const filtered = currentNovel === "all" ? wikiData : wikiData.filter(d => d.novel === currentNovel || d.novel === "공통" || d.type === 2);
+        categories.forEach((cat, type) => {
+            const items = filtered.filter(d => d.type === type);
+            if (items.length === 0 && type !== 2) return;
+            // [검증완료] 독자 모드 은폐를 위한 클래스 부여
+            menu.innerHTML += `<div class="side-cat side-cat-${type}"><span>${cat}</span><span class="author-only" onclick="addItem(${type})" style="cursor:pointer;">+</span></div>`;
+            items.forEach(item => { const idx = wikiData.indexOf(item); menu.innerHTML += `<div class="side-item ${idx===currentPage-1?'active':''}" onclick="goPage(${idx+1})">${item.title}</div>`; });
+        });
+    }
+
+    function renderMonth(y, m, stamps) {
+        const days = new Date(y, m, 0).getDate(); const start = new Date(y, m-1, 1).getDay();
+        let html = `<div style="border:1px solid var(--border); padding:10px; border-radius:10px; background:#fff;"><b>${m}월</b><div class="cal-grid">`;
+        for(let i=0; i<start; i++) html += `<div></div>`;
+        for(let d=1; d<=days; d++) {
+            const dateStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`; const s = stamps[dateStr] || {m:false, n:false};
+            html += `<div class="cal-day ${selectedDate===dateStr?'active':''}" onclick="selectDate('${dateStr}')"><div class="stamp-m ${s.m?'done':''}">M</div><div class="stamp-n ${s.n?'done':''}">N</div><small style="position:relative;z-index:2;padding:2px;">${d}</small></div>`;
+        }
+        return html + `</div></div>`;
+    }
+    function selectDate(d) { selectedDate = d; renderPage(); }
+    function applyStamp(type) {
+        const item = wikiData[currentPage-1]; if(!item.stamps) item.stamps = {};
+        if(!item.stamps[selectedDate]) item.stamps[selectedDate] = {m:false, n:false};
+        if(type==='m') item.stamps[selectedDate].m = true; if(type==='n') item.stamps[selectedDate].n = true;
+        if(type==='clear') item.stamps[selectedDate] = {m:false, n:false};
+        save(); renderPage();
+    }
+    function addMonth() { const item = wikiData[currentPage-1]; item.visibleMonths = (item.visibleMonths || 1) + 1; save(); renderPage(); }
+
+    function updateSelector() {
+        const sel = document.getElementById('novel-selector'); const ns = [...new Set(wikiData.map(d=>d.novel))].filter(n=>n && n!=="공통");
+        sel.innerHTML = '<option value="all">전체 프로젝트 보기</option>'; ns.forEach(n=>sel.innerHTML+=`<option value="${n}" ${currentNovel===n?'selected':''}>${n}</option>`);
+    }
+
+    function createNewProject() {
+        const name=prompt("소설 제목:");
+        if(name){
+            categories.forEach((cat,idx) => {
+                if(idx === 2) return; 
+                const template = (idx === 0) ? analysisTemplate : "";
+                wikiData.push({novel:name, type:idx, title:`${cat} 초기 항목`, content:template, analysis:template, accessibility:"하", stamps:{}, visibleMonths:1});
+            });
+            save(); updateSelector(); switchNovel(name);
+        }
+    }
+
+    function addItem(t) { 
+        const novelName = (t === 2) ? "공통" : (currentNovel === "all" ? "기본" : currentNovel);
+        const template = (t === 0) ? analysisTemplate : "";
+        wikiData.push({novel:novelName, type:t, title:"새 항목", content:template, analysis:template, danger:1, habitat:"", weakness:"", testimony:""}); 
+        save(); renderSidebar(); goPage(wikiData.length);
+    }
+    
+    function deleteEntireProject() { if(confirm('프로젝트 전체 삭제?')){ wikiData=wikiData.filter(d=>d.novel!==currentNovel); save(); switchNovel("all"); } }
+    function deleteItem() { if(confirm('삭제?')){ wikiData.splice(currentPage-1,1); save(); if(currentPage>wikiData.length) currentPage=1; renderPage(); renderSidebar(); } }
+    function copyFullSource() { navigator.clipboard.writeText(document.documentElement.outerHTML); alert("전체 소스 복사 완료!"); }
+    function exportData() { const b=new Blob([JSON.stringify(wikiData)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`backup.json`; a.click(); }
+    function toggleMemo() { document.getElementById('m-box').classList.toggle('active'); }
+    function setTheme(c) { document.documentElement.style.setProperty('--accent',c); save(); }
     function toggleNarrativeTable() {
         const modal = document.getElementById('narrative-modal'); const body = document.getElementById('narrative-body');
         if (modal.style.display === 'flex') { modal.style.display = 'none'; return; }
         body.innerHTML = ""; wikiData.forEach(item => { if(item.actionLogs) item.actionLogs.forEach(l => { if(l.char||l.act) body.innerHTML += `<tr style="border-bottom:1px solid #eee;"><td style="padding:10px;">${categories[item.type]}</td><td style="padding:10px;"><b>${l.char}</b></td><td style="padding:10px;">${l.act}</td></tr>`; })});
         modal.style.display = 'flex';
     }
-    function update(f,v) { wikiData[currentPage-1][f]=v; save(); if(f==='title') renderSidebar(); }
-    function save() { localStorage.setItem('chunGakData_v30.2', JSON.stringify(wikiData)); }
-    function switchNovel(n) { currentNovel=n; localStorage.setItem('currentNovel',n); updateSelector(); renderSidebar(); currentPage=1; renderPage(); }
-    function setTheme(c) { document.documentElement.style.setProperty('--accent',c); localStorage.setItem('chunGakTheme', c); }
-    function jumpTo(name) { const idx=wikiData.findIndex(d=>d.type===1 && d.title===name); if(idx!==-1){ currentPage=idx+1; renderPage(); renderSidebar(); } }
-    function goPage(n) { currentPage=n; renderPage(); renderSidebar(); }
-    function toggleMemo() { document.getElementById('m-tab').classList.toggle('active'); document.getElementById('m-box').classList.toggle('active'); }
-    function addNode(id) { const f=(l)=>l.forEach(n=>n.id===id?n.children.push({id:Date.now(), name:"새 인물", color:"var(--rel-black)", children:[]}):f(n.children)); f(wikiData[currentPage-1].nodes); save(); renderPage(); }
-    function delNode(id) { const f=(l)=>{const i=l.findIndex(n=>n.id===id); if(i!==-1)l.splice(i,1); else l.forEach(n=>f(n.children));}; f(wikiData[currentPage-1].nodes); save(); renderPage(); }
-    function copyFullSource() { navigator.clipboard.writeText(document.documentElement.outerHTML); alert("전체 소스 복사 완료!"); }
-    
-    // [수정] 🔗 독자용 링크 복사: GitHub 공식 웹 주소 기준
-    function copyReaderLink() {
-        const githubURL = "https://sasayus.github.io/library/";
-        const readerLink = githubURL + "?mode=read";
-        navigator.clipboard.writeText(readerLink).then(() => {
-            alert("독자용 웹 링크(GitHub)가 복사되었습니다!\n" + readerLink);
-        });
-    }
-
-    function exportData() { const b=new Blob([JSON.stringify(wikiData)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`backup.json`; a.click(); }
-    function updateSelector() {
-        const sel = document.getElementById('novel-selector'); const ns = [...new Set(wikiData.map(d=>d.novel))].filter(n=>n);
-        sel.innerHTML = '<option value="all">전체 프로젝트 보기</option>'; ns.forEach(n=>sel.innerHTML+=`<option value="${n}" ${currentNovel===n?'selected':''}>${n}</option>`);
-    }
-    function renderSidebar() {
-        const menu = document.getElementById('sidebar-menu'); menu.innerHTML = '';
-        const filtered = currentNovel === "all" ? wikiData : wikiData.filter(d=>d.novel===currentNovel || d.type === 2);
-        [0,1,2,3,4,5,6,7,8,9].forEach(type => {
-            const items = filtered.filter(d=>d.type===type);
-            if (items.length === 0 && type !== 2) return;
-            menu.innerHTML += `<div class="side-cat side-cat-${type}"><span>${categories[type]}</span><span class="author-only" onclick="addItem(${type})">+</span></div>`;
-            items.forEach(item => { const idx=wikiData.indexOf(item); menu.innerHTML += `<div class="side-item ${idx===currentPage-1?'active' :''}" onclick="goPage(${idx+1})">${item.title}</div>`; });
-        });
-    }
-    function createProject(name) { categories.forEach((cat,idx) => { wikiData.push({novel:name, type:idx, title:`${cat} 초기 항목`, content:"", danger:1}); }); save(); }
-    function createNewProject() { const name=prompt("소설 제목:"); if(name){ createProject(name); switchNovel(name); } }
-    function deleteEntireProject() { if(confirm('프로젝트 전체 삭제?')){ wikiData=wikiData.filter(d=>d.novel!==currentNovel); save(); switchNovel("all"); } }
-    function deleteItem() { if(confirm('삭제?')){ wikiData.splice(currentPage-1,1); save(); currentPage=1; renderPage(); renderSidebar(); } }
-    function addItem(t) { wikiData.push({novel:currentNovel==="all"?"기본":currentNovel, type:t, title:"새 항목", content:"", danger:1}); save(); renderSidebar(); }
-    function inStat(f) { const v=prompt("글자수:"); if(v){ wikiData[currentPage-1][f]=v; save(); renderPage(); } }
 </script>
+
 
 </body></html>
