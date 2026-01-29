@@ -1,6 +1,6 @@
 <html lang="ko"><head>
     <meta charset="UTF-8">
-    <title>작가 천각 아카이브 V3 (Security Enhanced)</title>
+    <title>작가 천각 아카이브 V3 (Final Master)</title>
     <style>
         :root { 
             --bg: #f5f5f7; --card: #ffffff; --sidebar: #ffffff;
@@ -13,14 +13,14 @@
         }
         body { font-family: 'Pretendard', sans-serif; background: var(--bg); color: var(--text); display: flex; margin: 0; height: 100vh; overflow: hidden; transition: 0.3s; }
         
-        /* [보안 강화] 독자 모드: 세계관(0), 복선(6), 연재(9) 전면 은폐 */
+        /* 독자 모드: 0(세계관), 6(복선), 9(연재) 및 작가 도구 전면 은폐 */
         body.reader-mode .author-only, 
         body.reader-mode .side-cat-0, 
         body.reader-mode .side-cat-6, 
         body.reader-mode .side-cat-9 { display: none !important; }
 
         /* 사이드바 접기 */
-        nav { width: 300px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 25px 20px; overflow-y: auto; display: flex; flex-direction: column; z-index: 100; transition: transform 0.4s, width 0.4s; position: relative; }
+        nav { width: 300px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 25px 20px; overflow-y: auto; display: flex; flex-direction: column; z-index: 100; transition: 0.4s; position: relative; }
         nav.folded { width: 0; padding: 0; border-right: none; transform: translateX(-300px); }
         .toggle-btn { position: fixed; left: 310px; top: 20px; z-index: 200; background: var(--card); border: 1px solid var(--border); border-radius: 50%; width: 35px; height: 35px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); transition: 0.4s; font-size: 0.8rem; font-weight: 900; }
         nav.folded + .toggle-btn { left: 20px; transform: rotate(180deg); }
@@ -32,29 +32,32 @@
         .side-item { font-size: 0.85rem; padding: 10px 14px; cursor: pointer; border-radius: 8px; margin-top: 4px; transition: 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .side-item.active { background: var(--accent); color: #fff; font-weight: 700; }
 
-        /* 메인 콘텐츠 */
+        /* 메인 에디터 */
         main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 60px; align-items: center; position: relative; transition: 0.4s; }
         .wiki-card { background: var(--card); padding: 60px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.03); width: 100%; max-width: 900px; min-height: 800px; border-top: 10px solid var(--accent); position: relative; }
         .editor { line-height: 2.1; font-size: 1.15rem; outline: none; min-height: 350px; white-space: pre-wrap; padding: 25px; background: rgba(0,0,0,0.015); border-radius: 14px; border: 1px solid var(--border); margin-top: 25px; }
 
-        /* 난이도 세그먼트 */
+        /* 난이도 UI */
         .diff-selector { display: flex; background: #eee; border-radius: 12px; padding: 4px; gap: 4px; width: fit-content; margin-bottom: 25px; }
         .diff-opt { padding: 10px 22px; border-radius: 8px; font-size: 0.85rem; font-weight: 800; cursor: pointer; transition: 0.3s; color: #888; border: none; }
         .diff-opt.active.low { background: var(--low); color: white; box-shadow: 0 4px 12px rgba(52, 199, 89, 0.4); }
         .diff-opt.active.mid { background: var(--mid); color: white; box-shadow: 0 4px 12px rgba(255, 204, 0, 0.4); }
         .diff-opt.active.high { background: var(--high); color: white; box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4); }
 
-        /* 캐릭터 태그 */
+        /* 캐릭터 점프 태그 */
         .char-tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; padding: 15px; background: #f1f2f6; border-radius: 12px; border-left: 5px solid var(--accent); }
         .char-tag { background: var(--accent); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .char-tag:hover { filter: brightness(1.2); transform: translateY(-2px); }
 
         /* 몬스터 별점 */
-        .star-box { font-size: 1.5rem; letter-spacing: 5px; cursor: pointer; display: inline-block; }
+        .star-box { font-size: 1.5rem; letter-spacing: 5px; cursor: pointer; display: inline-block; margin: 10px 0; }
         .star-rainbow { background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: rainbow 2s infinite linear; }
         @keyframes rainbow { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
         .star-red { color: var(--star-red) !important; } .star-gold { color: var(--star-gold) !important; }
 
-        /* 그리드 및 테이블 */
+        /* 그리드 및 위젯 */
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .info-box { background: #f9f9fb; padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
         .log-grid { display: grid; grid-template-columns: 120px 1fr 40px; gap: 8px; margin-bottom: 8px; background: #f9f9fb; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
         .log-input { border: 1px solid var(--border); padding: 8px; border-radius: 6px; font-size: 0.85rem; outline: none; background: #fff; width: 100%; box-sizing: border-box; }
         .plot-table { width: 100%; border-collapse: collapse; margin: 15px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
@@ -69,7 +72,7 @@
         .stamp-n { position: absolute; right: 0; width: 50%; height: 100%; background: rgba(25,118,210,0.2); display: flex; align-items:center; justify-content:center; color: var(--novel); font-weight: 900; font-size: 0.6rem; opacity: 0; }
         .stamp-m.done, .stamp-n.done { opacity: 1; }
 
-        /* 작가 전용 UI */
+        /* 작가 도구 패널 */
         .author-tools { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--border); padding-top: 20px; margin-top: auto; }
         .btn-tool { background: var(--card); border: 1px solid var(--border); padding: 10px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.75rem; text-align: center; }
         .side-bookmark { position: absolute; top: 150px; right: -15px; width: 22px; height: 90px; background: #ffcc00; font-weight: 900; writing-mode: vertical-rl; text-align: center; border-radius: 6px 0 0 6px; cursor: pointer; z-index: 100; transition: 0.3s; font-size: 0.75rem; }
@@ -90,7 +93,7 @@
         <div class="dot" style="background:#1b5e20" onclick="setTheme('#1b5e20')"></div>
     </div>
     <select id="novel-selector" class="novel-selector" onchange="switchNovel(this.value)"><option value="all">전체 프로젝트 보기</option><option value="조선 판타지">조선 판타지</option><option value="고귀한 뱀파이어" selected="">고귀한 뱀파이어</option></select>
-    <div id="sidebar-menu"><div class="side-cat side-cat-0"><span>0. 세계관</span><span class="author-only" onclick="addItem(0)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(11)">0. 세계관 초기 항목</div><div class="side-cat side-cat-1"><span>1. 캐릭터</span><span class="author-only" onclick="addItem(1)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(12)">1. 캐릭터 초기 항목</div><div class="side-cat side-cat-2"><span>2. 몬스터(공통)</span><span class="author-only" onclick="addItem(2)" style="cursor:pointer;">+</span></div><div class="side-item active" onclick="goPage(1)">스켈레톤</div><div class="side-cat side-cat-3"><span>3. 짜투리</span><span class="author-only" onclick="addItem(3)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(13)">3. 짜투리 초기 항목</div><div class="side-cat side-cat-4"><span>4. 가계도</span><span class="author-only" onclick="addItem(4)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(14)">4. 가계도 초기 항목</div><div class="side-cat side-cat-5"><span>5. 연대기</span><span class="author-only" onclick="addItem(5)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(15)">5. 연대기 초기 항목</div><div class="side-cat side-cat-6"><span>6. 복선 현황</span><span class="author-only" onclick="addItem(6)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(16)">6. 복선 현황 초기 항목</div><div class="side-cat side-cat-7"><span>7. 스토리보드</span><span class="author-only" onclick="addItem(7)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(17)">7. 스토리보드 초기 항목</div><div class="side-cat side-cat-8"><span>8. 멀티버스</span><span class="author-only" onclick="addItem(8)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(18)">8. 멀티버스 초기 항목</div><div class="side-cat side-cat-9"><span>9. 연재 &amp; 캘린더</span><span class="author-only" onclick="addItem(9)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(19)">9. 연재 &amp; 캘린더 초기 항목</div></div>
+    <div id="sidebar-menu"><div class="side-cat side-cat-0"><span>0. 세계관</span><span class="author-only" onclick="addItem(0)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(11)">0. 세계관 초기 항목</div><div class="side-cat side-cat-1"><span>1. 캐릭터</span><span class="author-only" onclick="addItem(1)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(12)">1. 캐릭터 초기 항목</div><div class="side-cat side-cat-2"><span>2. 몬스터(공통)</span><span class="author-only" onclick="addItem(2)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(1)">스켈레톤</div><div class="side-cat side-cat-3"><span>3. 짜투리</span><span class="author-only" onclick="addItem(3)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(13)">3. 짜투리 초기 항목</div><div class="side-cat side-cat-4"><span>4. 가계도</span><span class="author-only" onclick="addItem(4)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(14)">4. 가계도 초기 항목</div><div class="side-cat side-cat-5"><span>5. 연대기</span><span class="author-only" onclick="addItem(5)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(15)">5. 연대기 초기 항목</div><div class="side-cat side-cat-6"><span>6. 복선 현황</span><span class="author-only" onclick="addItem(6)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(16)">6. 복선 현황 초기 항목</div><div class="side-cat side-cat-7"><span>7. 스토리보드</span><span class="author-only" onclick="addItem(7)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(17)">7. 스토리보드 초기 항목</div><div class="side-cat side-cat-8"><span>8. 멀티버스</span><span class="author-only" onclick="addItem(8)" style="cursor:pointer;">+</span></div><div class="side-item " onclick="goPage(18)">8. 멀티버스 초기 항목</div><div class="side-cat side-cat-9"><span>9. 연재 &amp; 캘린더</span><span class="author-only" onclick="addItem(9)" style="cursor:pointer;">+</span></div><div class="side-item active" onclick="goPage(19)">9. 연재 &amp; 캘린더 초기 항목</div></div>
     <div class="author-tools author-only">
         <button class="btn-tool" style="background:var(--accent); color:#fff;" onclick="copyFullSource()">💾 전체 소스 복사</button>
         <button class="btn-tool" style="color:var(--novel);" onclick="copyReaderLink()">🔗 독자용 링크 생성</button>
@@ -105,13 +108,18 @@
 
 <main id="main-content">
     <div id="main-card-slot"><div class="wiki-card">
-            <div style="font-size:0.75rem; color:var(--sub-text); text-align:right;">[공통] 2. 몬스터(공통)</div>
-            <h1 contenteditable="true" oninput="update('title', this.innerText)">스켈레톤</h1><div id="m-tab" class="side-bookmark author-only" onclick="toggleMemo()">MEMO</div><div id="m-box" class="side-memo-box" contenteditable="true" oninput="update('memo', this.innerText)"></div><button class="author-only" style="position:absolute; top:20px; left:20px; border:none; background:none; color:red; cursor:pointer; font-weight:900; opacity:0.3;" onclick="deleteItem()">✕ DELETE</button><div class="info-grid">
-                <div class="info-box"><small>배경/생태</small><div contenteditable="true" oninput="update('habitat',this.innerText)" style="outline:none;">던전</div></div>
-                <div class="info-box"><small>약점/능력</small><div contenteditable="true" oninput="update('weakness',this.innerText)" style="outline:none;">타격/성속성</div></div>
-            </div><div class="star-box star-gold" onclick="cycleDanger(0)">★☆☆☆☆☆☆☆☆☆</div>
-                       <div style="background:#fff5f5; border-left:6px solid var(--monster); padding:15px; border-radius:12px; margin-top:15px;"><b>증언:</b><div contenteditable="true" oninput="update('testimony', this.innerText)" style="outline:none;">뼈 소리가 들리면 늦었다.</div></div>
-            <div class="editor" contenteditable="true" oninput="update('content', this.innerText)" onkeyup="if(2===9) renderPage()"></div>
+            <div style="font-size:0.75rem; color:var(--sub-text); text-align:right;">[고귀한 뱀파이어] 9. 연재 &amp; 캘린더</div>
+            <h1 contenteditable="true" oninput="update('title', this.innerText)">9. 연재 &amp; 캘린더 초기 항목</h1><div id="m-tab" class="side-bookmark author-only" onclick="toggleMemo()">MEMO</div><div id="m-box" class="side-memo-box" contenteditable="true" oninput="update('memo', this.innerText)"></div><button class="author-only" style="position:absolute; top:20px; left:20px; border:none; background:none; color:red; cursor:pointer; font-weight:900; opacity:0.3;" onclick="deleteItem()">✕ DELETE</button><div style="background:#f1f2f6; padding:20px; border-radius:15px; margin-bottom:20px;" class="author-only">
+                <div style="display:flex; gap:10px; margin-bottom:15px;">
+                    <a href="https://gemini.google.com/" target="_blank" class="btn-tool" style="flex:2; background:var(--novel); color:#fff; text-decoration:none;">🎯 AI 퇴고 검수</a>
+                    <button class="btn-tool" style="flex:1" onclick="applyStamp('m')">M 도장</button>
+                    <button class="btn-tool" style="flex:1" onclick="applyStamp('n')">N 도장</button>
+                </div>
+                <b>현황: 공백 제외 0자 / 선택 날짜: 2026-01-29</b>
+            </div>
+            <div class="cal-container"><div style="border:1px solid var(--border); padding:10px; border-radius:10px; background:#fff;"><b>1월</b><div class="cal-grid"><div></div><div></div><div></div><div></div><div class="cal-day " onclick="selectDate('2026-01-01')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">1</small></div><div class="cal-day " onclick="selectDate('2026-01-02')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">2</small></div><div class="cal-day " onclick="selectDate('2026-01-03')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">3</small></div><div class="cal-day " onclick="selectDate('2026-01-04')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">4</small></div><div class="cal-day " onclick="selectDate('2026-01-05')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">5</small></div><div class="cal-day " onclick="selectDate('2026-01-06')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">6</small></div><div class="cal-day " onclick="selectDate('2026-01-07')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">7</small></div><div class="cal-day " onclick="selectDate('2026-01-08')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">8</small></div><div class="cal-day " onclick="selectDate('2026-01-09')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">9</small></div><div class="cal-day " onclick="selectDate('2026-01-10')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">10</small></div><div class="cal-day " onclick="selectDate('2026-01-11')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">11</small></div><div class="cal-day " onclick="selectDate('2026-01-12')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">12</small></div><div class="cal-day " onclick="selectDate('2026-01-13')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">13</small></div><div class="cal-day " onclick="selectDate('2026-01-14')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">14</small></div><div class="cal-day " onclick="selectDate('2026-01-15')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">15</small></div><div class="cal-day " onclick="selectDate('2026-01-16')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">16</small></div><div class="cal-day " onclick="selectDate('2026-01-17')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">17</small></div><div class="cal-day " onclick="selectDate('2026-01-18')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">18</small></div><div class="cal-day " onclick="selectDate('2026-01-19')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">19</small></div><div class="cal-day " onclick="selectDate('2026-01-20')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">20</small></div><div class="cal-day " onclick="selectDate('2026-01-21')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">21</small></div><div class="cal-day " onclick="selectDate('2026-01-22')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">22</small></div><div class="cal-day " onclick="selectDate('2026-01-23')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">23</small></div><div class="cal-day " onclick="selectDate('2026-01-24')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">24</small></div><div class="cal-day " onclick="selectDate('2026-01-25')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">25</small></div><div class="cal-day " onclick="selectDate('2026-01-26')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">26</small></div><div class="cal-day " onclick="selectDate('2026-01-27')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">27</small></div><div class="cal-day " onclick="selectDate('2026-01-28')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">28</small></div><div class="cal-day active" onclick="selectDate('2026-01-29')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">29</small></div><div class="cal-day " onclick="selectDate('2026-01-30')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">30</small></div><div class="cal-day " onclick="selectDate('2026-01-31')"><div class="stamp-m ">M</div><div class="stamp-n ">N</div><small style="position:relative;z-index:2;padding:2px;">31</small></div></div></div></div>
+            <div class="author-only" style="margin-top:20px; text-align:center;"><button class="btn-tool" onclick="addMonth()">✚ 다음 달 추가</button></div>
+            <div class="editor" contenteditable="true" oninput="update('content', this.innerText)" onkeyup="if(9===9) renderPage()"></div>
         </div></div>
 </main>
 
@@ -158,8 +166,11 @@
         const item = wikiData[currentPage - 1];
         if (!item) return;
 
-        // [보호 로직] 서사 카테고리 캐릭터 부재 알림
-        if ([5, 7, 8].includes(item.type)) {
+        // [버그 수정] 독자 모드인지 확인
+        const isReader = document.body.classList.contains('reader-mode');
+
+        // [서사 가이드] 캐릭터 부재 시 안내
+        if (!isReader && [5, 7, 8].includes(item.type)) {
             const currentChars = wikiData.filter(d => d.type === 1 && (d.novel === currentNovel || d.novel === "공통"));
             if (currentChars.length === 0) {
                 alert("서사의 주인이 없습니다. 캐릭터를 먼저 추가해주세요!");
@@ -173,19 +184,19 @@
         // 캐릭터 점프 태그
         if ([5, 7, 8].includes(item.type)) {
             const chars = wikiData.filter(d => d.type === 1 && (d.novel === currentNovel || d.novel === "공통"));
-            ui += `<div class="char-tag-container author-only"><small style="width:100%; margin-bottom:5px; font-weight:800; color:var(--sub-text);"># 캐릭터 설정 바로가기:</small>${chars.map(c => `<span class="char-tag" onclick="jumpToChar('${c.title}')">${c.title}</span>`).join('')}</div>`;
+            ui += `<div class="char-tag-container"><small style="width:100%; margin-bottom:5px; font-weight:800; color:var(--sub-text);"># 캐릭터 상세 설정:</small>${chars.map(c => `<span class="char-tag" onclick="jumpToChar('${c.title}')">${c.title}</span>`).join('')}</div>`;
         }
 
         if (item.type === 1 || item.type === 2) {
             ui += `<div class="info-grid">
-                <div class="info-box"><small>배경/생태</small><div contenteditable="true" oninput="update('habitat',this.innerText)" style="outline:none;">${item.habitat||''}</div></div>
-                <div class="info-box"><small>약점/능력</small><div contenteditable="true" oninput="update('weakness',this.innerText)" style="outline:none;">${item.weakness||''}</div></div>
+                <div class="info-box"><small>배경/생태</small><div contenteditable="${!isReader}" oninput="update('habitat',this.innerText)" style="outline:none;">${item.habitat||''}</div></div>
+                <div class="info-box"><small>약점/능력</small><div contenteditable="${!isReader}" oninput="update('weakness',this.innerText)" style="outline:none;">${item.weakness||''}</div></div>
             </div>`;
             if (item.type === 2) {
                 const d = item.danger || 1;
                 let sClass = (d >= 10) ? 'star-rainbow' : (d >= 6 ? 'star-red' : 'star-gold');
-                ui += `<div class="star-box ${sClass}" onclick="cycleDanger(${currentPage-1})">${'★'.repeat(d)}${'☆'.repeat(10-d)}</div>
-                       <div style="background:#fff5f5; border-left:6px solid var(--monster); padding:15px; border-radius:12px; margin-top:15px;"><b>증언:</b><div contenteditable="true" oninput="update('testimony', this.innerText)" style="outline:none;">${item.testimony||''}</div></div>`;
+                ui += `<div class="star-box ${sClass}" onclick="${!isReader ? 'cycleDanger('+(currentPage-1)+')' : ''}">${'★'.repeat(d)}${'☆'.repeat(10-d)}</div>
+                       <div style="background:#fff5f5; border-left:6px solid var(--monster); padding:15px; border-radius:12px; margin-top:15px;"><b>증언:</b><div contenteditable="${!isReader}" oninput="update('testimony', this.innerText)" style="outline:none;">${item.testimony||''}</div></div>`;
             }
         }
 
@@ -196,7 +207,7 @@
                 <div class="diff-opt mid ${acc==='중'?'active':''}" onclick="setAcc('중')">현재는 어려움</div>
                 <div class="diff-opt high ${acc==='상'?'active':''}" onclick="setAcc('상')">한참 뒤에 집필</div>
             </div>
-            <div style="background:#f8f9fa; border-left:6px solid var(--accent); padding:20px; border-radius:12px; margin-bottom:20px;" contenteditable="true" oninput="update('analysis', this.innerText)">${item.analysis || analysisTemplate}</div>`;
+            <div style="background:#f8f9fa; border-left:6px solid var(--accent); padding:20px; border-radius:12px; margin-bottom:20px;" contenteditable="${!isReader}" oninput="update('analysis', this.innerText)">${item.analysis || analysisTemplate}</div>`;
         }
 
         if (item.type === 6) {
@@ -204,18 +215,13 @@
             ui += `<table class="plot-table">
                 <thead><tr><th>회수</th><th>내용</th><th>뿌림</th><th>회수</th><th class="author-only">✕</th></tr></thead>
                 <tbody>${item.plots.map((p,i)=>`<tr>
-                    <td><input type="checkbox" ${p.solved?'checked':''} onchange="updatePlot(${i},'solved',this.checked)"></td>
-                    <td><input class="log-input" style="width:100%" value="${p.desc}" oninput="updatePlot(${i},'desc',this.value)"></td>
-                    <td><input class="log-input" style="width:100%; text-align:center" value="${p.sown}" oninput="updatePlot(${i},'sown',this.value)"></td>
-                    <td><input class="log-input" style="width:100%; text-align:center" value="${p.reaped}" oninput="updatePlot(${i},'reaped',this.value)"></td>
+                    <td><input type="checkbox" ${p.solved?'checked':''} ${isReader?'disabled':''} onchange="updatePlot(${i},'solved',this.checked)"></td>
+                    <td><input class="log-input" style="width:100%" value="${p.desc}" ${isReader?'readonly':''} oninput="updatePlot(${i},'desc',this.value)"></td>
+                    <td><input class="log-input" style="width:100%; text-align:center" value="${p.sown}" ${isReader?'readonly':''} oninput="updatePlot(${i},'sown',this.value)"></td>
+                    <td><input class="log-input" style="width:100%; text-align:center" value="${p.reaped}" ${isReader?'readonly':''} oninput="updatePlot(${i},'reaped',this.value)"></td>
                     <td class="author-only"><button onclick="delPlot(${i})" style="border:none;background:none;color:red;cursor:pointer">✕</button></td>
                 </tr>`).join('')}</tbody>
             </table><button class="btn-tool author-only" onclick="addPlot()">✚ 복선 추가</button>`;
-        }
-
-        if ([4, 5, 7, 8].includes(item.type)) {
-            if(!item.actionLogs) item.actionLogs = [{char:"", act:""}];
-            ui += `<div>${item.actionLogs.map((l,i)=>`<div class="log-grid"><input class="log-input" placeholder="인물/단계" value="${l.char}" oninput="updateLog(${i},'char',this.value)"><input class="log-input" placeholder="내용" value="${l.act}" oninput="updateLog(${i},'act',this.value)"><button class="author-only" onclick="delLog(${i})" style="border:none; background:none; color:red; cursor:pointer;">✕</button></div>`).join('')}<button class="btn-tool author-only" onclick="addLog()">✚ 항목 추가</button></div>`;
         }
 
         if (item.type === 9) {
@@ -223,7 +229,7 @@
             const cleanLen = txt.replace(/\s/g,'').length;
             ui += `<div style="background:#f1f2f6; padding:20px; border-radius:15px; margin-bottom:20px;" class="author-only">
                 <div style="display:flex; gap:10px; margin-bottom:15px;">
-                    <a href="https://gemini.google.com/" target="_blank" class="btn-tool" style="flex:2; background:var(--accent); color:#fff; text-decoration:none;">🎯 AI 퇴고 검수</a>
+                    <a href="https://gemini.google.com/" target="_blank" class="btn-tool" style="flex:2; background:var(--novel); color:#fff; text-decoration:none;">🎯 AI 퇴고 검수</a>
                     <button class="btn-tool" style="flex:1" onclick="applyStamp('m')">M 도장</button>
                     <button class="btn-tool" style="flex:1" onclick="applyStamp('n')">N 도장</button>
                 </div>
@@ -233,13 +239,23 @@
             <div class="author-only" style="margin-top:20px; text-align:center;"><button class="btn-tool" onclick="addMonth()">✚ 다음 달 추가</button></div>`;
         }
 
+        if ([4, 5, 7, 8].includes(item.type)) {
+            if(!item.actionLogs) item.actionLogs = [{char:"", act:""}];
+            ui += `<div>${item.actionLogs.map((l,i)=>`<div class="log-grid">
+                <input class="log-input" placeholder="인물/단계" value="${l.char}" ${isReader?'readonly':''} oninput="updateLog(${i},'char',this.value)">
+                <input class="log-input" placeholder="내용/행동" value="${l.act}" ${isReader?'readonly':''} oninput="updateLog(${i},'act',this.value)">
+                <button class="author-only" onclick="delLog(${i})" style="border:none; background:none; color:red; cursor:pointer;">✕</button>
+            </div>`).join('')}<button class="btn-tool author-only" onclick="addLog()">✚ 항목 추가</button></div>`;
+        }
+
         slot.innerHTML = `<div class="wiki-card">
             <div style="font-size:0.75rem; color:var(--sub-text); text-align:right;">[${item.novel}] ${categories[item.type]}</div>
-            <h1 contenteditable="true" oninput="update('title', this.innerText)">${item.title}</h1>${ui}
-            <div class="editor" contenteditable="true" oninput="update('content', this.innerText)" onkeyup="if(${item.type}===9) renderPage()">${item.content || ''}</div>
+            <h1 contenteditable="${!isReader}" oninput="update('title', this.innerText)">${item.title}</h1>${ui}
+            <div class="editor" contenteditable="${!isReader}" oninput="update('content', this.innerText)" onkeyup="if(${item.type}===9) renderPage()">${item.content || ''}</div>
         </div>`;
     }
 
+    // 로직 제어
     function jumpToChar(name) {
         const idx = wikiData.findIndex(d => d.type === 1 && d.title === name);
         if (idx !== -1) { currentPage = idx + 1; renderPage(); renderSidebar(); }
@@ -263,7 +279,6 @@
         categories.forEach((cat, type) => {
             const items = filtered.filter(d => d.type === type);
             if (items.length === 0 && type !== 2) return;
-            // [검증완료] 독자 모드 은폐를 위한 클래스 부여
             menu.innerHTML += `<div class="side-cat side-cat-${type}"><span>${cat}</span><span class="author-only" onclick="addItem(${type})" style="cursor:pointer;">+</span></div>`;
             items.forEach(item => { const idx = wikiData.indexOf(item); menu.innerHTML += `<div class="side-item ${idx===currentPage-1?'active':''}" onclick="goPage(${idx+1})">${item.title}</div>`; });
         });
@@ -284,7 +299,6 @@
         const item = wikiData[currentPage-1]; if(!item.stamps) item.stamps = {};
         if(!item.stamps[selectedDate]) item.stamps[selectedDate] = {m:false, n:false};
         if(type==='m') item.stamps[selectedDate].m = true; if(type==='n') item.stamps[selectedDate].n = true;
-        if(type==='clear') item.stamps[selectedDate] = {m:false, n:false};
         save(); renderPage();
     }
     function addMonth() { const item = wikiData[currentPage-1]; item.visibleMonths = (item.visibleMonths || 1) + 1; save(); renderPage(); }
@@ -315,7 +329,18 @@
     
     function deleteEntireProject() { if(confirm('프로젝트 전체 삭제?')){ wikiData=wikiData.filter(d=>d.novel!==currentNovel); save(); switchNovel("all"); } }
     function deleteItem() { if(confirm('삭제?')){ wikiData.splice(currentPage-1,1); save(); if(currentPage>wikiData.length) currentPage=1; renderPage(); renderSidebar(); } }
-    function copyFullSource() { navigator.clipboard.writeText(document.documentElement.outerHTML); alert("전체 소스 복사 완료!"); }
+    
+    // [버그 수정] 독자용 링크 생성 로직 고도화
+    function copyReaderLink() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('mode', 'read');
+        const readerUrl = url.toString();
+        navigator.clipboard.writeText(readerUrl).then(() => {
+            alert("독자용 링크가 복사되었습니다:\n" + readerUrl + "\n\n(주의: 데이터가 포함된 파일을 배포해야 독자가 내용을 볼 수 있습니다.)");
+        });
+    }
+
+    function copyFullSource() { navigator.clipboard.writeText(document.documentElement.outerHTML); alert("소스 복사 완료!"); }
     function exportData() { const b=new Blob([JSON.stringify(wikiData)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`backup.json`; a.click(); }
     function toggleMemo() { document.getElementById('m-box').classList.toggle('active'); }
     function setTheme(c) { document.documentElement.style.setProperty('--accent',c); save(); }
